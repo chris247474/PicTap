@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using Acr.UserDialogs;
 using Contacts;
 using System.Linq;
+using GPUImage.Filters.ColorProcessing;
 
 namespace PicTap
 {
@@ -200,7 +201,7 @@ namespace PicTap
 					}
 				}
 			}
-
+			UserDialogs.Instance.HideLoading();
 			//refractor to save all contacts
 			var singlecontacttest = saveList.ElementAt(0);
 			/*ContactsHelper.PushNewContactDialogue(singlecontacttest.GivenName, singlecontacttest.FamilyName, 
@@ -210,7 +211,7 @@ namespace PicTap
 			await PostImageRecognitionActions.OpenIn(singlecontacttest.GivenName, singlecontacttest.FamilyName,
 															  singlecontacttest.PhoneNumbers, singlecontacttest.OrganizationName);
 
-			UserDialogs.Instance.HideLoading();
+
 		}
 
 		public string SaveImageToDiskAndPhotosThenReturnPath(Stream s, string filename)
@@ -279,7 +280,7 @@ namespace PicTap
 
 
 
-		public async Task<Stream> PreprocessImage(string file, double GaussianSizeX, double GaussianSizeY){
+		/*public async Task<Stream> PreprocessImage(string file, double GaussianSizeX, double GaussianSizeY){
 			Console.WriteLine("in PreprocessImage:file");
 			//UserDialogs.Instance.ShowLoading ("Cleaning Image...");
 
@@ -289,16 +290,13 @@ namespace PicTap
 			var sharpenedImage = UnSharpMask (origImage);
 			Console.WriteLine("sharpened image");
 
-			/*var croppedImageAsBytes = await Crop (sharpenedImage);
-			Console.WriteLine("cropped image");*/
-
 			//UserDialogs.Instance.HideLoading();
 
 			return GetStreamFromUIImage(sharpenedImage);
 
 			//adaptivethreshold here
 
-		}
+		}*/
 
 		public async Task<Stream> PreprocessUIImage(UIImage transformedcroppedimage)//, double GaussianSizeX, double GaussianSizeY)
 		{
@@ -307,18 +305,27 @@ namespace PicTap
 			if (transformedcroppedimage != null) {
 				UserDialogs.Instance.ShowLoading ("Cleaning Image...");
 
-				//var origImage = GetUIImageFromStream(origStream);
-				//Console.WriteLine("converted stream to UIImage");
-
 				var sharpenedImage = UnSharpMask(transformedcroppedimage);
 				Console.WriteLine("sharpened image");
 
-				//adaptivethreshold here
+				var adaptiveThreshImage = AdaptiveThreshold(sharpenedImage);//test
+
+				UIImage finalImage =
+					(adaptiveThreshImage == null) ? sharpenedImage : adaptiveThreshImage;
 
 				UserDialogs.Instance.HideLoading();
 
-				return GetStreamFromUIImage(sharpenedImage);
+				return GetStreamFromUIImage(finalImage);
 			}
+			return null;
+		}
+
+		public UIImage AdaptiveThreshold(UIImage inputImage) {
+			if (inputImage != null) { 
+				var imageFilter = new GPUImageAdaptiveThresholdFilter();
+				return imageFilter.CreateFilteredImage(inputImage);
+			}
+
 			return null;
 		}
 

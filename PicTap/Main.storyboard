@@ -156,6 +156,7 @@
     <resources>
         <image name="capture_button.png" width="66" height="66"/>
         <image name="focusIndicator.png" width="75" height="75"/>
+        <image name="BlueGradientBackground.png" width="640" height="1131"/>
     </resources>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">
         <simulatedScreenMetrics key="destination" type="retina47"/>

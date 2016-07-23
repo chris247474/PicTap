@@ -119,12 +119,15 @@ namespace PicTap
 
 		void dismissPreview(UITapGestureRecognizer dismissTap)
 		{
+			Console.WriteLine("dismiss tap");
 			UIView.Animate(0.7, 0, UIViewAnimationOptions.AllowUserInteraction,
 				() =>
 				{
 					dismissTap.View.Frame = CGRect.Inflate(this.View.Bounds, 0, this.View.Bounds.Size.Height);
 				},
-				null
+			     ()=> {
+					 dismissTap.View.RemoveFromSuperview();
+				}
 			);
 		}
 
@@ -182,6 +185,7 @@ namespace PicTap
 					async () =>
 					{
 						await ImageHelper.loadContactsFromPic(captureImageView.Image, true);
+						dismissTap.View.RemoveFromSuperview();
 					}
 				);
 			}));

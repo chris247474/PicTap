@@ -80,7 +80,7 @@
     <MtouchUseRefCounting>true</MtouchUseRefCounting>
     <MtouchFloat32>true</MtouchFloat32>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
-    <MtouchLink>SdkOnly</MtouchLink>
+    <MtouchLink>Full</MtouchLink>
     <MtouchArch>ARMv7, ARM64</MtouchArch>
     <MtouchHttpClientHandler>HttpClientHandler</MtouchHttpClientHandler>
     <MtouchTlsProvider>Default</MtouchTlsProvider>
@@ -132,6 +132,9 @@
     </Reference>
     <Reference Include="HockeySDK.iOSBindings">
       <HintPath>..\Components\hockeyappios-4.1.0.2\lib\ios-unified\HockeySDK.iOSBindings.dll</HintPath>
+    </Reference>
+    <Reference Include="GPUImage">
+      <HintPath>..\Components\GPUImage-0.1.7.0\lib\ios-unified\GPUImage.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -205,6 +208,9 @@
     <BundleResource Include="Resources\focusIndicator.png" />
     <BundleResource Include="Resources\focusIndicator%402x.png" />
     <BundleResource Include="Resources\CAPPDB26.db3" />
+    <BundleResource Include="Resources\BlueGradientBackground.png" />
+    <BundleResource Include="Resources\BlueGradientBackground%402x.png" />
+    <BundleResource Include="Resources\BlueGradientBackground%403x.png" />
   </ItemGroup>
   <ItemGroup>
     <XamarinComponentReference Include="googleiosmobileads">
@@ -213,6 +219,10 @@
     </XamarinComponentReference>
     <XamarinComponentReference Include="hockeyappios">
       <Version>4.1.0.2</Version>
+      <Visible>False</Visible>
+    </XamarinComponentReference>
+    <XamarinComponentReference Include="GPUImage">
+      <Version>0.1.7.0</Version>
       <Visible>False</Visible>
     </XamarinComponentReference>
   </ItemGroup>

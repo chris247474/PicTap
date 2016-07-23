@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="7706" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="IPDFCameraViewController">
+            <connections>
+                <outlet property="view" destination="2" id="RRd-Eg-VrN"/>
+                <outlet property="titleLabel" destination="5" id="name-outlet-5"/>
+                <outlet property="CaptureButton" destination="7" id="name-outlet-7"/>
+                <outlet property="CropButton" destination="9" id="name-outlet-9"/>
+                <outlet property="FilterButton" destination="8" id="name-outlet-8"/>
+                <outlet property="FlashButton" destination="6" id="name-outlet-6"/>
+                <outlet property="focusIndicator" destination="10" id="name-outlet-10"/>
+                <outlet property="ipdfView" destination="2" id="name-outlet-2"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="2" customClass="IPDFCamera">
+            <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+            <subviews>
+                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Label" lineBreakMode="tailTruncation" minimumFontSize="10" id="5" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO">
+                    <rect key="frame" x="0.0" y="0.0" width="600" height="48"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                    <nil key="highlightedColor"/>
+                    <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="48"/>
+                        <mask key="constraints">
+                            <include reference="265"/>
+                            <include reference="266"/>
+                        </mask>
+                    </variation>
+                    <constraints>
+                        <constraint id="265" firstItem="5" firstAttribute="width" constant="400"/>
+                        <constraint id="266" firstItem="5" firstAttribute="height" constant="59"/>
+                    </constraints>
+                    <variation key="default">
+                        <mask key="constraints">
+                            <exclude reference="265"/>
+                            <exclude reference="266"/>
+                        </mask>
+                    </variation>
+                </label>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="9" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES" enabled="NO" hidden="YES">
+                    <rect key="frame" x="505" y="396" width="70" height="30"/>
+                    <state key="normal" title="CROP On">
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="CropButton_TouchUpInside:" destination="-1" id="14" eventType="touchUpInside"/>
+                    </connections>
+                    <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
+                        <rect key="frame" x="505" y="396" width="70" height="30"/>
+                    </variation>
+                    <variation key="widthClass=compact" fixedFrame="YES">
+                        <rect key="frame" x="505" y="396" width="70" height="30"/>
+                    </variation>
+                </button>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" id="10" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES" alpha="0" image="focusIndicator.png">
+                    <rect key="frame" x="92" y="99" width="44" height="42"/>
+                    <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
+                        <rect key="frame" x="92" y="99" width="44" height="42"/>
+                    </variation>
+                    <variation key="heightClass=regular-widthClass=regular" fixedFrame="YES">
+                        <rect key="frame" x="92" y="99" width="44" height="42"/>
+                    </variation>
+                </imageView>
+                <view contentMode="scaleToFill" id="118" translatesAutoresizingMaskIntoConstraints="NO" misplaced="YES">
+                    <rect key="frame" x="0.0" y="488" width="422" height="112"/>
+                    <subviews>
+                        <button contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="7" translatesAutoresizingMaskIntoConstraints="NO" opaque="NO">
+                            <rect key="frame" x="267" y="8" width="66" height="66"/>
+                            <state key="normal" image="capture_button.png">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="CaptureButton_TouchUpInside:" destination="-1" id="11" eventType="touchUpInside"/>
+                            </connections>
+                            <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
+                                <rect key="frame" x="267" y="8" width="66" height="66"/>
+                                <mask key="constraints">
+                                    <include reference="255"/>
+                                    <include reference="256"/>
+                                </mask>
+                            </variation>
+                            <variation key="widthClass=compact">
+                                <rect key="frame" x="167" y="8" width="66" height="66"/>
+                            </variation>
+                            <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                <rect key="frame" x="267" y="8" width="66" height="66"/>
+                            </variation>
+                            <constraints>
+                                <constraint id="255" firstItem="7" firstAttribute="width" constant="66"/>
+                                <constraint id="256" firstItem="7" firstAttribute="height" constant="66"/>
+                            </constraints>
+                            <variation key="default">
+                                <mask key="constraints">
+                                    <exclude reference="255"/>
+                                    <exclude reference="256"/>
+                                </mask>
+                            </variation>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="8" translatesAutoresizingMaskIntoConstraints="NO" misplaced="YES">
+                            <rect key="frame" x="20" y="61" width="47" height="31"/>
+                            <state key="normal" title="FILTER">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="FilterButton_TouchUpInside:" destination="-1" id="13" eventType="touchUpInside"/>
+                            </connections>
+                            <variation key="heightClass=regular-widthClass=compact">
+                                <rect key="frame" x="20" y="61" width="47" height="31"/>
+                            </variation>
+                            <variation key="widthClass=compact" misplaced="YES">
+                                <rect key="frame" x="20" y="61" width="47" height="31"/>
+                            </variation>
+                            <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                <rect key="frame" x="20" y="61" width="47" height="31"/>
+                            </variation>
+                            <constraints>
+                                <constraint id="200" firstItem="8" firstAttribute="height" constant="31"/>
+                            </constraints>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="6" translatesAutoresizingMaskIntoConstraints="NO">
+                            <rect key="frame" x="341" y="62" width="71" height="30"/>
+                            <state key="normal" title="FLASH On">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="FlashButton_TouchUpInside:" destination="-1" id="12" eventType="touchUpInside"/>
+                            </connections>
+                            <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
+                                <rect key="frame" x="341" y="62" width="71" height="30"/>
+                                <mask key="constraints">
+                                    <include reference="259"/>
+                                </mask>
+                            </variation>
+                            <variation key="widthClass=compact" misplaced="YES">
+                                <rect key="frame" x="509" y="62" width="71" height="30"/>
+                            </variation>
+                            <variation key="heightClass=regular-widthClass=regular" fixedFrame="YES">
+                                <rect key="frame" x="364" y="62" width="71" height="30"/>
+                            </variation>
+                            <constraints>
+                                <constraint id="259" firstItem="6" firstAttribute="width" constant="93"/>
+                            </constraints>
+                            <variation key="default">
+                                <mask key="constraints">
+                                    <exclude reference="259"/>
+                                </mask>
+                            </variation>
+                        </button>
+                    </subviews>
+                    <constraints>
+                        <constraint id="185" firstItem="118" firstAttribute="centerY" secondItem="7" secondAttribute="centerY" constant="15"/>
+                        <constraint id="186" firstItem="7" firstAttribute="centerX" secondItem="118" secondAttribute="centerX"/>
+                        <constraint id="189" firstItem="118" firstAttribute="bottom" secondItem="7" secondAttribute="bottom" constant="38"/>
+                        <constraint id="190" firstItem="7" firstAttribute="top" secondItem="118" secondAttribute="top" constant="8"/>
+                        <constraint id="199" firstItem="118" firstAttribute="bottom" secondItem="8" secondAttribute="bottom" constant="20"/>
+                        <constraint id="201" firstItem="8" firstAttribute="top" secondItem="118" secondAttribute="top" constant="61"/>
+                        <constraint id="217" firstItem="118" firstAttribute="centerY" secondItem="7" secondAttribute="centerY" constant="15"/>
+                        <constraint id="239" firstItem="118" firstAttribute="trailing" secondItem="6" secondAttribute="trailing" constant="20"/>
+                        <constraint id="240" firstItem="118" firstAttribute="bottom" secondItem="6" secondAttribute="bottom" constant="20"/>
+                        <constraint id="245" firstItem="8" firstAttribute="leading" secondItem="118" secondAttribute="leading" constant="20"/>
+                        <constraint id="246" firstItem="8" firstAttribute="centerY" secondItem="6" secondAttribute="centerY"/>
+                        <constraint id="247" firstItem="6" firstAttribute="centerY" secondItem="8" secondAttribute="centerY"/>
+                        <constraint id="248" firstItem="8" firstAttribute="top" secondItem="7" secondAttribute="centerY" constant="20"/>
+                        <constraint id="249" firstItem="6" firstAttribute="top" secondItem="7" secondAttribute="centerY" constant="20"/>
+                        <constraint id="260" firstItem="6" firstAttribute="leading" secondItem="7" secondAttribute="trailing" constant="54"/>
+                    </constraints>
+                    <color key="backgroundColor" colorSpace="calibratedRGB" red="0" green="0" blue="0" alpha="0.49803921568627452"/>
+                    <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
+                        <rect key="frame" x="0.0" y="488" width="422" height="112"/>
+                        <mask key="constraints">
+                            <include reference="239"/>
+                            <include reference="240"/>
+                            <include reference="245"/>
+                            <include reference="246"/>
+                            <include reference="247"/>
+                            <include reference="248"/>
+                            <include reference="249"/>
+                            <include reference="260"/>
+                        </mask>
+                    </variation>
+                    <variation key="default">
+                        <mask key="constraints">
+                            <exclude reference="239"/>
+                            <exclude reference="240"/>
+                            <exclude reference="245"/>
+                            <exclude reference="246"/>
+                            <exclude reference="247"/>
+                            <exclude reference="248"/>
+                            <exclude reference="249"/>
+                            <exclude reference="260"/>
+                        </mask>
+                    </variation>
+                </view>
+            </subviews>
+            <constraints>
+                <constraint id="122" firstItem="118" firstAttribute="centerX" secondItem="2" secondAttribute="centerX"/>
+                <constraint id="147" firstItem="118" firstAttribute="trailing" secondItem="2" secondAttribute="trailing"/>
+                <constraint id="148" firstItem="118" firstAttribute="bottom" secondItem="2" secondAttribute="bottom"/>
+                <constraint id="161" firstItem="118" firstAttribute="leading" secondItem="2" secondAttribute="leading"/>
+                <constraint id="263" firstItem="5" firstAttribute="centerX" secondItem="2" secondAttribute="centerX"/>
+                <constraint id="264" firstItem="5" firstAttribute="centerX" secondItem="2" secondAttribute="centerX"/>
+            </constraints>
+            <connections/>
+            <variation key="default">
+                <mask key="constraints">
+                    <exclude reference="263"/>
+                    <exclude reference="264"/>
+                </mask>
+            </variation>
+            <variation key="heightClass=regular-widthClass=compact">
+                <mask key="constraints">
+                    <include reference="263"/>
+                    <include reference="264"/>
+                </mask>
+            </variation>
+        </view>
+    </objects>
+    <resources>
+        <image name="trending-Small.png" width="29" height="29"/>
+        <image name="clear-Small.png" width="29" height="29"/>
+        <image name="placeholder-contact-male.png" width="250" height="250"/>
+        <image name="fontawesome-webfont.ttf" width="0" height="0"/>
+        <image name="trending-Medium.png" width="58" height="58"/>
+        <image name="Message-100-yellow.png" width="100" height="100"/>
+        <image name="Message-green-100.png" width="100" height="100"/>
+        <image name="SpeechBubble.png" width="100" height="100"/>
+        <image name="Feedback.png" width="100" height="100"/>
+        <image name="FinishFlag.png" width="100" height="100"/>
+        <image name="PhoneOld.png" width="26" height="26"/>
+        <image name="Phone.png" width="100" height="100"/>
+        <image name="Close.png" width="96" height="96"/>
+        <image name="Leaderboard.png" width="96" height="96"/>
+        <image name="UpArrow.png" width="100" height="100"/>
+        <image name="UpFromBottomLeft.png" width="100" height="100"/>
+        <image name="DownFromUpperLeft.png" width="100" height="100"/>
+        <image name="Hamburger-blue.png" width="22" height="22"/>
+        <image name="help.png" width="100" height="100"/>
+        <image name="HowToCappScreenshot.png" width="808" height="1304"/>
+        <image name="HowToFeedbackScreenshot.png" width="868" height="1536"/>
+        <image name="HowToSendYesCallsScreenshot.png" width="866" height="1542"/>
+        <image name="HowToSetStartingScreenshot.png" width="862" height="1538"/>
+        <image name="HowToUseDailyEmailScreenshot.png" width="868" height="1536"/>
+        <image name="HowToUseStatsScreenshot.png" width="868" height="1542"/>
+        <image name="HowToUseTextTemplatesScreenshot.png" width="864" height="1538"/>
+        <image name="Play-LightGray.png" width="50" height="50"/>
+        <image name="dome.png" width="670" height="94"/>
+        <image name="profile-blue.png" width="250" height="220"/>
+        <image name="profile-orange.png" width="250" height="250"/>
+        <image name="profile-purple.png" width="398" height="398"/>
+        <image name="profile-red.png" width="392" height="392"/>
+        <image name="Plus.png" width="22" height="22"/>
+        <image name="Checkmark.png" width="22" height="22"/>
+        <image name="Edit.png" width="22" height="22"/>
+        <image name="NextArrowBlue.png" width="22" height="22"/>
+        <image name="flame.png" width="22" height="22"/>
+        <image name="snowflake.png" width="22" height="22"/>
+        <image name="people.png" width="22" height="22"/>
+        <image name="semi.png" width="22" height="22"/>
+        <image name="todo.png" width="22" height="22"/>
+        <image name="Close-Thin.png" width="100" height="100"/>
+        <image name="OrangeGradientBackground.png" width="640" height="1138"/>
+        <image name="splashbackgroundorangegradient.png" width="1242" height="2208"/>
+        <image name="profile-green.png" width="316" height="314"/>
+        <image name="profile-purpleblue.png" width="400" height="400"/>
+        <image name="message-blue-outline.png" width="100" height="100"/>
+        <image name="Phone-blue-outline.png" width="100" height="100"/>
+        <image name="Phone-blue-filled.png" width="100" height="100"/>
+        <image name="message-blue-filled.png" width="100" height="100"/>
+        <image name="capture_button.png" width="66" height="66"/>
+        <image name="ic_add_white_24dp.png" width="36" height="36"/>
+        <image name="Images/Calendar/datecell.png" width="47" height="45"/>
+        <image name="Images/Calendar/datecellmarked.png" width="46" height="30"/>
+        <image name="Images/Calendar/datecellselected.png" width="16" height="16"/>
+        <image name="Images/Calendar/leftarrow.png" width="14" height="17"/>
+        <image name="Images/Calendar/rightarrow.png" width="14" height="17"/>
+        <image name="Images/Calendar/shadow.png" width="320" height="198"/>
+        <image name="Images/Calendar/today.png" width="16" height="16"/>
+        <image name="Images/Calendar/todayselected.png" width="16" height="16"/>
+        <image name="Images/Calendar/topbar.png" width="320" height="44"/>
+        <image name="Images/Checkbox/checked_checkbox.png" width="25" height="25"/>
+        <image name="Images/Checkbox/unchecked_checkbox.png" width="25" height="25"/>
+        <image name="Images/RadioButton/checked.png" width="24" height="24"/>
+        <image name="Images/RadioButton/unchecked.png" width="24" height="24"/>
+        <image name="iossplash.png" width="2048" height="2048"/>
+        <image name="cap.png" width="242" height="227"/>
+        <image name="focusIndicator.png" width="75" height="75"/>
+    </resources>
+</document>

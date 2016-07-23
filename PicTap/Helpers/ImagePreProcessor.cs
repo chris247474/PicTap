@@ -17,7 +17,7 @@ namespace PicTap
 {
 	public class ImagePreProcessor
 	{
-		public IEnumerable<Tesseract.Result> imageResult{ get; set;}
+		//public IEnumerable<Tesseract.Result> imageResult{ get; set;}
 		//IPDFCameraViewController IPDFCamera;
 
 		public ImagePreProcessor ()
@@ -56,7 +56,29 @@ namespace PicTap
 			Console.WriteLine("loadContactsFromPic Done");
 		}
 
-		public async Task ReadImageTextThenSaveToPhoneContacts(Stream bwSharpenedStream)
+		public async Task loadContactsFromPic(Stream transformedcropped, bool saveProcessedImage)
+		{
+			//Preprocess image for better text recognition results
+			Stream preProcessedStream = await PreprocessUIImage(
+				GetUIImageFromStream(transformedcropped));
+
+			//save for testing purposes
+			if (saveProcessedImage) SaveImageToPhotosApp(preProcessedStream, System.DateTime.Now.Second + "bwsharp.png");
+
+			//Tesseract text recognition
+			await ReadImageTextThenSaveToPhoneContacts(preProcessedStream);
+
+			Console.WriteLine("loadContactsFromPic Done");
+		}
+
+		public async Task<Stream> UserCrop(Stream image) {
+			var viewController = new TOCrop.TOCropViewController(GetUIImageFromStream(image));
+			var rootViewController = UIApplication.SharedApplication.KeyWindow.RootViewController;//UIApplication.SharedApplication.Delegate.GetWindow().RootViewController;
+			var croppedImageBytes = await viewController.ShowCropViewAsync(rootViewController, true, null);
+			return BytesToStream(croppedImageBytes);
+		}
+
+		public async Task ReadImageTextThenSaveToPhoneContacts(Stream bwSharpenedStream, bool singledetect = true)
 		{
 			Console.WriteLine("In ReadImageTextThenSaveToDB");
 			UserDialogs.Instance.ShowLoading("Reading Image...", new MaskType?(MaskType.Clear));
@@ -66,6 +88,7 @@ namespace PicTap
 			string firstname, lastname, number, aff;
 			int errorStatus;
 			List<CNMutableContact> saveList = new List<CNMutableContact>();
+			Tesseract.Result result;
 			//CNMutableContact ContactToSave;
 
 			if (bwSharpenedStream == null)
@@ -73,9 +96,10 @@ namespace PicTap
 				throw new ArgumentNullException("ReadImageTextThenSaveToDB bwSharpenedStream param is null");
 			}
 
-			IEnumerable<Tesseract.Result> imageResult = await 
+			var imageList = await 
 				loadFromPicDivideBy(Tesseract.PageIteratorLevel.Textline,
-					bwSharpenedStream);
+			                        bwSharpenedStream);
+			var imageResult = imageList.ToArray();
 
 			if (imageResult == null)
 			{
@@ -83,13 +107,14 @@ namespace PicTap
 			}
 			else {
 
-				foreach (Tesseract.Result result in imageResult)
+				for (int c = 0; c < (singledetect ? 1 : imageResult.Length);c++)//foreach (Tesseract.Result result in imageResult)
 				{
 					errorStatus = 0;
 					firstname = null;
 					lastname = null;
 					number = null;
 					aff = null;
+					result = imageResult[c];
 
 					try
 					{
@@ -196,7 +221,13 @@ namespace PicTap
 					}
 					catch (Exception)
 					{
-						//skip
+						//get some help from user - test
+						if (singledetect) {
+							var usercrop = await UserCrop(bwSharpenedStream);
+							await ReadImageTextThenSaveToPhoneContacts(usercrop);
+							return;
+						}
+
 						Console.WriteLine("ERROR SAVING CONTACT - SKIPPING: " + error);
 					}
 				}
@@ -321,8 +352,8 @@ namespace PicTap
 		}
 
 		public UIImage AdaptiveThreshold(UIImage inputImage) {
-			if (inputImage != null) { 
-				var imageFilter = new GPUImageAdaptiveThresholdFilter();
+			if (inputImage != null) {
+			var imageFilter = new GPUImageAdaptiveThresholdFilter();
 				return imageFilter.CreateFilteredImage(inputImage);
 			}
 

@@ -10,16 +10,16 @@
         <scene sceneID="yl2-sM-qoP">
             <objects>
                 <tabBarController id="49e-Tb-3d3" sceneMemberID="viewController" title="PicTap">
-                    <nil key="simulatedBottomBarMetrics"/>
                     <tabBar key="tabBar" contentMode="scaleToFill" id="W28-zg-YXA">
-                        <rect key="frame" x="0.0" y="551" width="600" height="49"/>
+                        <rect key="frame" x="0.0" y="618" width="375" height="49"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     </tabBar>
                     <connections>
                         <segue id="480" destination="69" kind="relationship" relationship="viewControllers"/>
                     </connections>
-                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
+                    <nil key="simulatedTopBarMetrics"/>
+                    <nil key="simulatedStatusBarMetrics"/>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HuB-VB-40B" sceneMemberID="firstResponder"/>
             </objects>
@@ -33,7 +33,7 @@
                         <viewControllerLayoutGuide type="bottom" id="67"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="70" customClass="IPDFCamera">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <subviews>
@@ -42,50 +42,29 @@
                                 <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
                                     <rect key="frame" x="0.0" y="521" width="374" height="94"/>
                                     <mask key="subviews">
-                                        <include reference="124"/>
                                         <include reference="125"/>
-                                        <include reference="126"/>
                                         <include reference="127"/>
+                                        <include reference="505"/>
                                     </mask>
                                 </variation>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="124" translatesAutoresizingMaskIntoConstraints="NO">
-                                        <rect key="frame" x="164" y="0.0" width="46" height="30"/>
-                                        <state key="normal" image="capture_button.png">
-                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                        </state>
-                                        <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
-                                            <rect key="frame" x="164" y="-17" width="46" height="47"/>
-                                        </variation>
-                                        <connections>
-                                            <action selector="CaptureButton_TouchUpInside:" destination="69" id="130" eventType="touchUpInside"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="125" translatesAutoresizingMaskIntoConstraints="NO">
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="125" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
                                         <rect key="frame" x="164" y="51" width="46" height="30"/>
-                                        <state key="normal" title="Filter">
+                                        <state key="normal" image="filter.png">
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
                                         <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
-                                            <rect key="frame" x="164" y="51" width="46" height="30"/>
+                                            <rect key="frame" x="308" y="51" width="46" height="30"/>
                                         </variation>
                                         <connections>
                                             <action selector="FilterButton_TouchUpInside:" destination="69" id="131" eventType="touchUpInside"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="126" translatesAutoresizingMaskIntoConstraints="NO">
-                                        <rect key="frame" x="308" y="44" width="46" height="30"/>
-                                        <state key="normal" title="Crop">
-                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                        </state>
-                                        <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
-                                            <rect key="frame" x="308" y="44" width="46" height="30"/>
-                                        </variation>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="127" translatesAutoresizingMaskIntoConstraints="NO">
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="127" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
                                         <rect key="frame" x="20" y="51" width="46" height="30"/>
-                                        <state key="normal" title="Flash">
+                                        <state key="normal" image="flash.png">
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                            <color key="titleColor" colorSpace="calibratedWhite" white="0" alpha="0"/>
                                         </state>
                                         <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
                                             <rect key="frame" x="20" y="51" width="46" height="30"/>
@@ -94,17 +73,28 @@
                                             <action selector="FlashButton_TouchUpInside:" destination="69" id="132" eventType="touchUpInside"/>
                                         </connections>
                                     </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="505" translatesAutoresizingMaskIntoConstraints="NO">
+                                        <rect key="frame" x="164" y="51" width="46" height="30"/>
+                                        <state key="normal" title="Choose Photo">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
+                                            <rect key="frame" x="138" y="51" width="100" height="30"/>
+                                        </variation>
+                                        <connections>
+                                            <action selector="ChoosePhotoButton_TouchUpInside:" destination="69" id="508" eventType="touchUpInside"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <variation key="default">
                                     <mask key="subviews">
-                                        <exclude reference="124"/>
                                         <exclude reference="125"/>
-                                        <exclude reference="126"/>
                                         <exclude reference="127"/>
+                                        <exclude reference="505"/>
                                     </mask>
                                 </variation>
                             </view>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Title" lineBreakMode="tailTruncation" minimumFontSize="10" id="128" translatesAutoresizingMaskIntoConstraints="NO">
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" lineBreakMode="tailTruncation" minimumFontSize="10" id="128" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
                                 <rect key="frame" x="166" y="46" width="42" height="21"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -114,23 +104,48 @@
                                     <rect key="frame" x="166" y="46" width="42" height="21"/>
                                 </variation>
                             </label>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" id="129" translatesAutoresizingMaskIntoConstraints="NO">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" id="129" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
                                 <rect key="frame" x="36" y="94" width="160" height="240"/>
                                 <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
                                     <rect key="frame" x="36" y="94" width="62" height="58"/>
                                 </variation>
                             </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="126" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="308" y="44" width="46" height="30"/>
+                                <state key="normal">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
+                                    <rect key="frame" x="283" y="212" width="46" height="30"/>
+                                </variation>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="124" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="164" y="0.0" width="46" height="30"/>
+                                <state key="normal" image="capture_button.png">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
+                                    <rect key="frame" x="164" y="513" width="46" height="47"/>
+                                </variation>
+                                <connections>
+                                    <action selector="CaptureButton_TouchUpInside:" destination="69" id="130" eventType="touchUpInside"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <variation key="default">
                             <mask key="subviews">
                                 <exclude reference="128"/>
                                 <exclude reference="129"/>
+                                <exclude reference="126"/>
+                                <exclude reference="124"/>
                             </mask>
                         </variation>
                         <variation key="heightClass=regular-widthClass=compact">
                             <mask key="subviews">
                                 <include reference="128"/>
                                 <include reference="129"/>
+                                <include reference="126"/>
+                                <include reference="124"/>
                             </mask>
                         </variation>
                     </view>
@@ -138,12 +153,11 @@
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="ipdfView" destination="70" id="name-outlet-70"/>
-                        <outlet property="CaptureButton" destination="124" id="name-outlet-124"/>
                         <outlet property="FlashButton" destination="127" id="name-outlet-127"/>
                         <outlet property="FilterButton" destination="125" id="name-outlet-125"/>
-                        <outlet property="CropButton" destination="126" id="name-outlet-126"/>
                         <outlet property="titleLabel" destination="128" id="name-outlet-128"/>
                         <outlet property="focusIndicator" destination="129" id="name-outlet-129"/>
+                        <outlet property="ChoosePhotoButton" destination="505" id="name-outlet-505"/>
                     </connections>
                     <nil key="simulatedTopBarMetrics"/>
                     <navigationItem title="Title" id="334" key="navigationItem"/>
@@ -157,6 +171,9 @@
         <image name="capture_button.png" width="66" height="66"/>
         <image name="focusIndicator.png" width="75" height="75"/>
         <image name="BlueGradientBackground.png" width="640" height="1131"/>
+        <image name="filter.png" width="22" height="22"/>
+        <image name="flash.png" width="22" height="22"/>
+        <image name="flashoff.png" width="22" height="22"/>
     </resources>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">
         <simulatedScreenMetrics key="destination" type="retina47"/>

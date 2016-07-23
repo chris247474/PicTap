@@ -136,6 +136,9 @@
     <Reference Include="GPUImage">
       <HintPath>..\Components\GPUImage-0.1.7.0\lib\ios-unified\GPUImage.dll</HintPath>
     </Reference>
+    <Reference Include="Xamarin.Mobile">
+      <HintPath>..\Components\xamarin.mobile-0.7.7\lib\ios-unified\Xamarin.Mobile.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\Contents.json" />
@@ -145,6 +148,15 @@
     <ImageAsset Include="Assets.xcassets\Second.imageset\vector.pdf" />
     <ImageAsset Include="Assets.xcassets\Contents.json" />
     <ImageAsset Include="Assets.xcassets\LaunchImage.launchimage\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\Icon-App-29x29%401x.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\Icon-App-29x29%402x.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\Icon-App-29x29%403x.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\Icon-App-40x40%402x.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\Icon-App-40x40%403x.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\Icon-App-57x57%401x.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\Icon-App-57x57%402x.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\Icon-App-60x60%402x.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\Icon-App-60x60%403x.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
@@ -187,11 +199,16 @@
     <Compile Include="Helpers\iOSNavigationHelper.cs" />
     <Compile Include="Helpers\PostImageRecognitionActions.cs" />
     <Compile Include="Helpers\AdFactory.cs" />
+    <Compile Include="Helpers\PhotoPickerService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Projects\IPDFCamera_Binding\IPDFCamera_Binding\IPDFCamera_Binding.csproj">
       <Project>{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}</Project>
       <Name>IPDFCamera_Binding</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TOCrop-iOS\TOCrop.csproj">
+      <Project>{9013F5C5-AFD3-4E3D-AB35-D882FBE61A35}</Project>
+      <Name>TOCrop</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -211,6 +228,15 @@
     <BundleResource Include="Resources\BlueGradientBackground.png" />
     <BundleResource Include="Resources\BlueGradientBackground%402x.png" />
     <BundleResource Include="Resources\BlueGradientBackground%403x.png" />
+    <BundleResource Include="Resources\filter.png" />
+    <BundleResource Include="Resources\filter%402x.png" />
+    <BundleResource Include="Resources\filter%403x.png" />
+    <BundleResource Include="Resources\flash.png" />
+    <BundleResource Include="Resources\flash%402x.png" />
+    <BundleResource Include="Resources\flash%403x.png" />
+    <BundleResource Include="Resources\flashoff.png" />
+    <BundleResource Include="Resources\flashoff%402x.png" />
+    <BundleResource Include="Resources\flashoff%403x.png" />
   </ItemGroup>
   <ItemGroup>
     <XamarinComponentReference Include="googleiosmobileads">
@@ -223,6 +249,10 @@
     </XamarinComponentReference>
     <XamarinComponentReference Include="GPUImage">
       <Version>0.1.7.0</Version>
+      <Visible>False</Visible>
+    </XamarinComponentReference>
+    <XamarinComponentReference Include="xamarin.mobile">
+      <Version>0.7.7</Version>
       <Visible>False</Visible>
     </XamarinComponentReference>
   </ItemGroup>

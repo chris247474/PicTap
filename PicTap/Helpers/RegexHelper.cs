@@ -5,6 +5,14 @@ namespace PicTap
 {
 	public static class RegexHelper
 	{
+		public const string EMAILREGEXV2 = "^([\\w-\\.]+@(?!gmail.com)(?!yahoo.com)(?!hotmail.com)([\\w- ]+\\.)+[\\w-]{2,4})?$";
+		public const string EMAILREGEX = "^\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$";
+		public const string NUMREGEX = "((\\()*(\\))*(\\d+)*(\\s)*(-)*(\\d+)*(-)*)*";
+		public const string SINGLENAMEREGEX = "([A-Z]*[a-z]*)(\\\\s*)*";
+		public const string MULTIPLENAMEREGEX = "(([A-Z]*[a-z]*)(\\s*)*)*";
+		public const string WWW_LIMITEDURLREGEX = "((www\\.|(http|https|ftp|news|file)+\\:\\/\\/)[_.a-z0-9-]+\\.[a-z0-9\\/_:@=.+?,##%&~-]*[^.|\\'|\\# |!|\\(|?|,| |>|<|;|\\)])";
+		public const string COM_LIMITEDREGEX = "(http(s)?:)?([\\w-]+\\.)+[\\w-]+[.com]+([?%&=]*)?";
+
 		public static string subtractFromString(string stringToRemove, string originalString)
 		{
 			return originalString.Replace(stringToRemove, "");

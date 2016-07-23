@@ -74,6 +74,10 @@ namespace PicTap
 
 			Console.WriteLine("no UINavigationController found");
 
+			return GetTopUIViewController();
+		}
+
+		public static UIViewController GetTopUIViewController() { 
 			var vc = UIApplication.SharedApplication.KeyWindow.RootViewController;
 			while (vc.PresentedViewController != null)
 			{

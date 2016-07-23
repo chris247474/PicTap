@@ -16,11 +16,7 @@ namespace PicTap
     {
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UIButton CaptureButton { get; set; }
-
-        [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UIButton CropButton { get; set; }
+        UIKit.UIButton ChoosePhotoButton { get; set; }
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
@@ -54,16 +50,15 @@ namespace PicTap
         [GeneratedCode ("iOS Designer", "1.0")]
         partial void FlashButton_TouchUpInside (UIKit.UIButton sender);
 
+        [Action ("ChoosePhotoButton_TouchUpInside:")]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        partial void ChoosePhotoButton_TouchUpInside (UIKit.UIButton sender);
+
         void ReleaseDesignerOutlets ()
         {
-            if (CaptureButton != null) {
-                CaptureButton.Dispose ();
-                CaptureButton = null;
-            }
-
-            if (CropButton != null) {
-                CropButton.Dispose ();
-                CropButton = null;
+            if (ChoosePhotoButton != null) {
+                ChoosePhotoButton.Dispose ();
+                ChoosePhotoButton = null;
             }
 
             if (FilterButton != null) {

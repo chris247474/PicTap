@@ -13,6 +13,9 @@ namespace PicTap
     {
 		ImagePreProcessor ImageHelper = new ImagePreProcessor();
 		UIImageView captureImageView = new UIImageView();
+			NSString flashOn = (NSString)@"FLASH On", flashOff = (NSString)@"FLASH Off",
+			filterOn = (NSString)@"FLASH On", filterOff, singleDetect = (NSString)@"single", 
+			multiDetect = (NSString)@"multi";
 
 		WeakReference weakSelf;
 		IPDFViewController WeakSelf
@@ -54,6 +57,7 @@ namespace PicTap
 
 			ipdfView.SetupCameraView();
 			ipdfView.EnableBorderDetection = true;
+			ipdfView.EnableTorch = false;
 		}
 
 		public override void ViewDidAppear(bool animated)
@@ -65,6 +69,18 @@ namespace PicTap
 			ipdfView.AddGestureRecognizer(focusTap);
 
 			ipdfView.Start();
+		}
+
+		partial void ChoosePhotoButton_TouchUpInside(UIButton sender)
+		{
+			ChoosePhoto();
+		}
+
+		async Task ChoosePhoto() { 
+			var photoStream = await PhotoPickerService.ChoosePicture();
+			if (photoStream != null) {
+				await ImageHelper.loadContactsFromPic(photoStream, true);
+			}
 		}
 
 		void focusGesture(UITapGestureRecognizer sender)
@@ -84,7 +100,7 @@ namespace PicTap
 			}
 		}
 
-		void updateTitleLabel()
+		/*void updateTitleLabel()
 		{
 			CATransition animation = new CATransition();
 			animation.TimingFunction = CAMediaTimingFunction.FromName(CAMediaTimingFunction.EaseInEaseOut);
@@ -93,28 +109,31 @@ namespace PicTap
 			animation.Duration = 0.35;
 			this.titleLabel.Layer.AddAnimation(animation, CAAnimation.TransitionFade);
 
-			string filterMode =
+			string detectMode =
 				(this.ipdfView.CameraViewType == IPDFCameraViewType.BlackAndWhite) ? "TEXT FILTER" : "COLOR FILTER";
-			/*if (this.ipdfView.EnableBorderDetection) {
-				this.titleLabel.Text = (NSString)@"AUTOCROP On";
-			} else {
-				this.titleLabel.Text = (NSString)@"AUTOCROP Off";
-			}*/
-			this.titleLabel.Text = filterMode + " | " +
+			
+			this.titleLabel.Text = detectMode +
 				((this.ipdfView.EnableBorderDetection) ? "AUTOCROP On" : "AUTOCROP Off");
+		}*/
+
+		/*void changeFlashButton(NSString title)
+		{
+			FlashButton.SetImage(UIImage.FromFile(
+					(title.Contains(flashOn)) ? "flash.png" : "flashoff.png"),
+					UIControlState.Normal);
+		}*/
+
+		void changeFlashButton(bool enable)
+		{
+			FlashButton.SetImage(UIImage.FromFile(
+				enable ? "flash.png" : "flashoff.png"),
+					UIControlState.Normal);
 		}
 
-		void changeButton(UIButton button, NSString title, bool enabled)
-		{
-			button.SetTitle(title, UIControlState.Normal);
-			if (enabled)
-			{
-				button.SetTitleColor(UIColor.FromRGB((nfloat)1, (nfloat)0.81, (nfloat)0).ColorWithAlpha((nfloat)1),
-					UIControlState.Normal);
-			}
-			else {
-				button.SetTitleColor(UIColor.White, UIControlState.Normal);
-			}
+		void changeDetectButton(NSString title) { 
+			FilterButton.SetImage(UIImage.FromFile(
+				(title.Contains(singleDetect)) ? "singledetect.png" : "multidetect.png"),
+				UIControlState.Normal);
 		}
 
 		void dismissPreview(UITapGestureRecognizer dismissTap)
@@ -195,7 +214,7 @@ namespace PicTap
 		{
 			this.ipdfView.CameraViewType = (this.ipdfView.CameraViewType == IPDFCameraViewType.BlackAndWhite) ?
 				IPDFCameraViewType.Normal : IPDFCameraViewType.BlackAndWhite;
-			this.updateTitleLabel();
+			//this.updateTitleLabel();
 		}
 
 		partial void FlashButton_TouchUpInside(UIButton sender)
@@ -203,8 +222,8 @@ namespace PicTap
 			try
 			{
 				bool enable = !this.ipdfView.EnableTorch;
-				NSString text = (enable) ? (NSString)@"FLASH On" : (NSString)@"FLASH Off";
-				this.changeButton(sender as UIButton, text, enable);
+				//NSString text = (enable) ? flashOn : flashOff;
+				this.changeFlashButton(enable);
 				this.ipdfView.EnableTorch = enable;
 			}
 			catch (Exception e)

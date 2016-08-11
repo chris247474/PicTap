@@ -16,11 +16,11 @@ namespace PicTap
     {
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UIButton ChoosePhotoButton { get; set; }
+        UIKit.UIButton CaptureBtn { get; set; }
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UIButton FilterButton { get; set; }
+        UIKit.UIButton ChoosePhotoButton { get; set; }
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
@@ -36,15 +36,19 @@ namespace PicTap
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UIActivityIndicatorView loadingView { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UIProgressView ProgressBar { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UIButton testButton { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
         UIKit.UILabel titleLabel { get; set; }
-
-        [Action ("CaptureButton_TouchUpInside:")]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        partial void CaptureButton_TouchUpInside (UIKit.UIButton sender);
-
-        [Action ("FilterButton_TouchUpInside:")]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        partial void FilterButton_TouchUpInside (UIKit.UIButton sender);
 
         [Action ("FlashButton_TouchUpInside:")]
         [GeneratedCode ("iOS Designer", "1.0")]
@@ -54,16 +58,24 @@ namespace PicTap
         [GeneratedCode ("iOS Designer", "1.0")]
         partial void ChoosePhotoButton_TouchUpInside (UIKit.UIButton sender);
 
+        [Action ("CaptureBtn_TouchUpInside:")]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        partial void CaptureBtn_TouchUpInside (UIKit.UIButton sender);
+
+        [Action ("TestButton_TouchUpInside:")]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        partial void TestButton_TouchUpInside (UIKit.UIButton sender);
+
         void ReleaseDesignerOutlets ()
         {
+            if (CaptureBtn != null) {
+                CaptureBtn.Dispose ();
+                CaptureBtn = null;
+            }
+
             if (ChoosePhotoButton != null) {
                 ChoosePhotoButton.Dispose ();
                 ChoosePhotoButton = null;
-            }
-
-            if (FilterButton != null) {
-                FilterButton.Dispose ();
-                FilterButton = null;
             }
 
             if (FlashButton != null) {
@@ -79,6 +91,21 @@ namespace PicTap
             if (ipdfView != null) {
                 ipdfView.Dispose ();
                 ipdfView = null;
+            }
+
+            if (loadingView != null) {
+                loadingView.Dispose ();
+                loadingView = null;
+            }
+
+            if (ProgressBar != null) {
+                ProgressBar.Dispose ();
+                ProgressBar = null;
+            }
+
+            if (testButton != null) {
+                testButton.Dispose ();
+                testButton = null;
             }
 
             if (titleLabel != null) {

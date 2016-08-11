@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using Acr.UserDialogs;
 using Contacts;
+using Foundation;
+using UIKit;
 
 namespace PicTap
 {
@@ -10,12 +12,11 @@ namespace PicTap
 		static string openin = "Export";
 		static string saveto = "Save to Contacts";
 
-		public static async Task OpenIn(string firstname, string lastname,
-			 CNLabeledValue<CNPhoneNumber>[] numbers, string org) 
+		public static async void OpenIn(CNMutableContact contact) 
 		{
 			var result = await UserDialogs.Instance.ActionSheetAsync(
-				string.Format("What do we do with contact {0} {1}", firstname, lastname), null, null, null, 
-			    new string[] { 
+				string.Format("What do we do with contact {0} {1}", contact.GivenName, contact.FamilyName), null, null, null,
+				new string[] {
 					openin,
 					saveto
 				}
@@ -23,11 +24,11 @@ namespace PicTap
 
 			if (string.Equals(result, openin))
 			{
-				await NativeDeviceUtil.Share(CombineContactDataForExporting(firstname, lastname, numbers, org));
+				await NativeDeviceUtil.Share(CombineContactDataForExporting(contact));
 			}
-			else if (string.Equals(result, saveto)){
-				ContactsHelper.PushNewContactDialogue(firstname, lastname,
-			   		numbers, org);
+			else if (string.Equals(result, saveto))
+			{
+				ContactsHelper.PushNewContactDialogue(contact);
 			}
 		}
 
@@ -40,10 +41,21 @@ namespace PicTap
 			return result;
 		}
 
-		static string CombineContactDataForExporting(string fname, string lname, CNLabeledValue<CNPhoneNumber>[] numbers,
-		    string org) 
+		static string CNEmailsToStrings(CNLabeledValue<NSString>[] emails)
 		{
-			return string.Format("Name: {0} {1} \n {2} Organization: {3}", fname, lname, CNPhoneNumbersToStrings(numbers), org);
+			string result = "\n";
+			for (int c = 0; c < emails.Length; c++)
+			{
+				result += "\t" + emails[c].Label + ": " + emails[c].Value + "\n\n";
+			}
+			return result;
+		}
+
+		static string CombineContactDataForExporting(CNMutableContact contact) 
+		{
+			return string.Format("Name: {0} {1}\n{2}Organization: {3}\nEmail Addresses:{4}", 
+			                     contact.GivenName, contact.FamilyName, CNPhoneNumbersToStrings(contact.PhoneNumbers), 
+			                     contact.OrganizationName, CNEmailsToStrings(contact.EmailAddresses));
 		}
 	}
 }

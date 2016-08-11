@@ -26,6 +26,9 @@ namespace PicTap
 			Xamarin.Calabash.Start();
 #endif
 
+			UserInteractionHelper.MarkIfFirstRun();
+			UserInteractionHelper.SetInstallDateIfFirstRun();
+
 			return true;
 		}
 

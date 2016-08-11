@@ -1,9 +1,8 @@
-/*
-// Helpers/Settings.cs This file was automatically added when you installed the Settings Plugin. If you are not using a PCL then comment this file back in to use it.
 using Plugin.Settings;
 using Plugin.Settings.Abstractions;
+using System;
 
-namespace Capp2.iOS.Helpers
+namespace PicTap
 {
   /// <summary>
   /// This is the Settings static class that can be used in your Core solution or in any
@@ -20,25 +19,122 @@ namespace Capp2.iOS.Helpers
       }
     }
 
-    #region Setting Constants
+	#region IsPremiumSettings
+	private const string IsPremiumKey = "ispremium";
+	private static bool IsPremiumDefault = false;
+	#endregion
 
-    private const string SettingsKey = "settings_key";
-    private static readonly string SettingsDefault = string.Empty;
+	public static bool IsPremiumSettings
+	{
+		get
+		{
+			return AppSettings.GetValueOrDefault<bool>(IsPremiumKey, IsPremiumDefault);
+		}
+		set
+		{
+			AppSettings.AddOrUpdateValue<bool>(IsPremiumKey, value);
+		}
+	}
 
-    #endregion
+	#region AskAgain
+	private const string AskAgainKey = "askagain";
+	private static bool AskAgainDefault = true;
+	#endregion
+
+	public static bool AskAgainSettings
+	{
+		get
+		{
+			return AppSettings.GetValueOrDefault<bool>(AskAgainKey, AskAgainDefault);
+		}
+		set
+		{
+			AppSettings.AddOrUpdateValue<bool>(AskAgainKey, value);
+		}
+	}
+
+	#region IsFirstRun
+	private const string IsFirstRunKey = "IsFirstRun";
+	private static bool IsFirstRunDefault = true;
+	#endregion
+
+	public static bool IsFirstRunSettings
+	{
+		get
+		{
+			return AppSettings.GetValueOrDefault<bool>(IsFirstRunKey, IsFirstRunDefault);
+		}
+		set
+		{
+			AppSettings.AddOrUpdateValue<bool>(IsFirstRunKey, value);
+		}
+	}
+	
+	#region TutorialSettings
+	private const string TutorialKey = "tutorialshown";
+	private static bool DefaultTutorialShown = false;
+	#endregion
+
+	public static bool TutorialShownSettings
+	{
+		get
+		{
+			return AppSettings.GetValueOrDefault<bool>(TutorialKey, DefaultTutorialShown);
+		}
+		set
+		{
+			AppSettings.AddOrUpdateValue<bool>(TutorialKey, value);
+		}
+	}
+
+	#region InstallDateSettings
+	private const string InstallDate = "installdatekey";
+	private static readonly DateTime InstallDateDefault = DateTime.MinValue;
+	#endregion
+
+	public static DateTime InstallDateSettings
+	{
+		get
+		{
+			return AppSettings.GetValueOrDefault<DateTime>(InstallDate, InstallDateDefault);
+		}
+		set
+		{
+			AppSettings.AddOrUpdateValue<DateTime>(InstallDate, value);
+		}
+	}
+
+	
+
+	#region Setting Email Constants
+	private const string EmailKey = "email_key";
+	private static readonly string EmailDefault = "";
+	#endregion
+
+	public static string EmailSettings
+	{
+		get
+		{
+			return AppSettings.GetValueOrDefault<string>(EmailKey, EmailDefault);
+		}
+		set
+		{
+			AppSettings.AddOrUpdateValue<string>(EmailKey, value);
+		}
+	}
 
 
-    public static string GeneralSettings
-    {
-      get
-      {
-        return AppSettings.GetValueOrDefault<string>(SettingsKey, SettingsDefault);
-      }
-      set
-      {
-        AppSettings.AddOrUpdateValue<string>(SettingsKey, value);
-      }
-    }
+	#region Setting CountKey Constants
+	const string CountKey = "count"; 
+	private static readonly int CountDefault = 0; 
+	#endregion
 
+	public static int Count { 
+		get { return AppSettings.GetValueOrDefault<int>(CountKey, CountDefault); } 
+		set { AppSettings.AddOrUpdateValue<int>(CountKey, value); } 
+	}
+
+	
+	
   }
-}*/
+}

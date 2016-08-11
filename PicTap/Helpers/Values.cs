@@ -6,6 +6,8 @@ namespace PicTap
 	{
 		public const string APPNAME = "PicTap";
 
+
+
 		public const string PICCROPPED = "cropped";
 		public const string IMPORTPIC = "Take a picture";
 
@@ -106,7 +108,9 @@ namespace PicTap
 		public const string ANYSTRINGREGEX = "(\\w*\\s*)*";
 		public const string INVALIDINBETWEENNUMREGEX = "(([A-Z]*(\\(*\\)*)[a-z]*)(\\s*)\\-*)*";
 		//SINGLESPECIALCHARREGEX doesnt detect "_" char cause of xamarin studio compiler confusion (doesnt detect, causes error) 
-		public const string SINGLESPECIALCHARREGEX = "(\\**\\'*\\`*\\~*\\.*\\,*\\?*\\:*\\;*\\\\*\\/*\\[*\\]*\\{*\\}*\\<*\\>*\\+*\\!*\\@*\\&*\\^*\\&*\\%*\\$*\\#*\\|*\\-*\\=*\\\"*)";
+		public const string SINGLESPECIALCHARREGEX =
+			"(\\(*\\)*\\**\\'*\\`*\\~*\\.*\\,*\\?*\\:*\\;*\\\\*\\/*\\[*\\]*\\{*\\}*\\<*\\>*\\!*\\@*\\&*\\^*\\&*\\%*\\$*\\#*\\|*\\-*\\=*\\\"*)";//\+*
+																										//"(\\(*\\)*\\**\\'*\\`*\\~*\\.*\\,*\\?*\\:*\\;*\\\\*\\/*\\[*\\]*\\{*\\}*\\<*\\>*\\+*\\!*\\@*\\&*\\^*\\&*\\%*\\$*\\#*\\|*\\-*\\=*\\\"*)";
 		public const string COMPLETESINGLESPECIALCHARREGEX = "\\(*\\)*\\**\\'*\\`*\\~*\\.*\\,*\\?*\\:*\\;*\\\\*\\/*\\[*\\]*\\{*\\}*\\<*\\>*\\+*\\!*\\@*\\&*\\^*\\&*\\%*\\$*\\#*\\|*\\-*\\=*\\\"*\\ *";
 		public const string COUNTRYCODE = "\\+63";
 		public const string WEIRDCHARFL = "ﬂ";

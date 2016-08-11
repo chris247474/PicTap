@@ -1,25 +1,56 @@
 ﻿using System;
 using Acr.UserDialogs;
-using AddressBook;
 using Contacts;
 using ContactsUI;
-using Foundation;
 using UIKit;
 
 namespace PicTap
 {
 	public class ContactsHelper
 	{
-		ABAddressBook abb = new ABAddressBook();
-		ABPerson[] contacts = null;
+		//ABAddressBook abb = new ABAddressBook();
+		//ABPerson[] contacts = null;
 
 		public ContactsHelper()
 		{
 			Console.WriteLine("Storing all contacts in iOS memory");
-			contacts = abb.GetPeople();
+			//contacts = abb.GetPeople();
 		}
 
-		public static void PushNewContactDialogue(string firstname, string lastname, 
+		public static void PushNewContactDialogue(CNMutableContact contact)
+		{
+			//NSError error;
+			//bool requestGranted = false;
+			var store = new CNContactStore();
+			store.RequestAccess(CNEntityType.Contacts,
+				new CNContactStoreRequestAccessHandler((granted, requestErr) =>
+				{
+				if (granted && requestErr == null)
+				{
+					var fetchKeys = new[] { CNContactViewController.DescriptorForRequiredKeys };
+					CNContactViewController editor;
+
+					editor = CNContactViewController.FromNewContact(contact);
+
+					Console.WriteLine("configuring CNContactViewController");
+					// Configure editor
+					editor.ContactStore = store;
+					editor.AllowsActions = true;
+					editor.AllowsEditing = true;
+					editor.Delegate = new CNViewControllerDelegate();
+					Console.WriteLine("done configuring CNContactViewController, requestGranted:{0}", granted);
+
+					if (granted) PushCNContactViewControllerWithToolBarItemsOutsideUINavigationController(editor, Values.APPNAME);
+					else UserDialogs.Instance.Alert("Go to Settings so we can save business cards to your contacts",
+					                                string.Format("{0} needs permission to save contacts", Values.APPNAME), 
+					                                "OK");
+				}
+			}));
+
+			Console.WriteLine("Done w function");
+		}
+
+		/*public static void PushNewContactDialogue(string firstname, string lastname, 
 		     CNLabeledValue<CNPhoneNumber>[] numbers, string org) 
 		{ 
 			NSError error;
@@ -46,22 +77,36 @@ namespace PicTap
 			PushCNContactViewControllerWithToolBarItemsOutsideUINavigationController(editor, Values.APPNAME);
 
 			Console.WriteLine("Done w function");
-		}
+		}*/
 
 		public static void PushCNContactViewControllerWithToolBarItemsOutsideUINavigationController(
 			UIViewController controlToPush, string title = "") 
-		{ 
-			var navcontrol = new UINavigationController
-			{
-				Title = title
-			};
-			navcontrol.PushViewController(controlToPush, true);
-			var vc = UIApplication.SharedApplication.KeyWindow.RootViewController;
-			while (vc.PresentedViewController != null)
-			{
-				vc = vc.PresentedViewController;
+		{
+			Console.WriteLine("in PushCNContactViewControllerWithToolBarItemsOutsideUINavigationController");
+			try { 
+				if (GlobalVariables.VCToInvokeOnMainThread != null)
+				{
+					GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(() =>
+					{
+						var vc = UIApplication.SharedApplication.KeyWindow.RootViewController;
+						while (vc.PresentedViewController != null)
+						{
+							vc = vc.PresentedViewController;
+						}
+
+						var navcontrol = new UINavigationController
+						{
+							Title = title
+						};
+						Console.WriteLine("created UINavigationController");
+						navcontrol.PushViewController(controlToPush, true);
+						Console.WriteLine("pushed contactsdialogue into navcontrol, showing UINavigationController");
+						vc.PresentViewController(navcontrol, true, () => { Console.WriteLine("navcontrol shown"); });
+					});
+				}
+			}catch(Exception e){
+				Console.WriteLine("Error when pushing controller: {0}", e.Message);
 			}
-			vc.PresentViewController(navcontrol, true, () => { });
 		}
 
 		public static void DismissCNContactViewControllerWithToolBarItemsOutsideUINavigationController(
@@ -70,7 +115,7 @@ namespace PicTap
 			iOSNavigationHelper.GetUINavigationController().DismissViewController(animated, completionHandler);
 		}
 
-		string SaveImageThenGetPath(ContactData contact, NSData image, ABPersonImageFormat format)
+		/*string SaveImageThenGetPath(ContactData contact, NSData image, ABPersonImageFormat format)
 		{
 			string filename = "";
 			try
@@ -130,7 +175,7 @@ namespace PicTap
 				UserDialogs.Instance.ShowError("Failed to save contact: " + firstName + " " + lastName + ". Pls try again.", 2000);
 			}
 			return false;
-		}
+		}*/
 	}
 }
 

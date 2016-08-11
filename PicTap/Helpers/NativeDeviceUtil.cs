@@ -43,7 +43,7 @@ namespace PicTap
 			UIApplication.SharedApplication.OpenUrl(smsTo);
 		}
 
-		string SaveDefaultImage(ContactData contact){
+		/*string SaveDefaultImage(ContactData contact){
 			string filename = System.IO.Path.Combine (Environment.GetFolderPath 
 				(Environment.SpecialFolder.Personal), 
 				"placeholder-contact-male.png");
@@ -77,7 +77,7 @@ namespace PicTap
 				Console.WriteLine ("Error in SaveImageThenGetPath(): {0}", e.Message);
 			}
 			return string.Empty;
-		}
+		}*/
         public bool SaveContactToDevice(string firstName, string lastName, string phone, string aff)
         {
             try {

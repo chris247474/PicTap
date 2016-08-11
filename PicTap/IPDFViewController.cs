@@ -1,11 +1,13 @@
 using Foundation;
 using System;
 using UIKit;
-using IPDFCamera_Binding;
 using CoreGraphics;
 using CoreAnimation;
 using System.Threading.Tasks;
 using Contacts;
+using System.Collections.Generic;
+using ContactsUI;
+using IPDFCamera_Binding;
 
 namespace PicTap
 {
@@ -13,9 +15,10 @@ namespace PicTap
     {
 		ImagePreProcessor ImageHelper = new ImagePreProcessor();
 		UIImageView captureImageView = new UIImageView();
-			NSString flashOn = (NSString)@"FLASH On", flashOff = (NSString)@"FLASH Off",
-			filterOn = (NSString)@"FLASH On", filterOff, singleDetect = (NSString)@"single", 
-			multiDetect = (NSString)@"multi";
+		NSString flashOn = (NSString)@"FLASH On", flashOff = (NSString)@"FLASH Off",
+		filterOn = (NSString)@"FLASH On", filterOff, singleDetect = (NSString)@"single", 
+		multiDetect = (NSString)@"multi";
+		UITapGestureRecognizer dismissTap;
 
 		WeakReference weakSelf;
 		IPDFViewController WeakSelf
@@ -26,6 +29,11 @@ namespace PicTap
 					return null;
 				return weakSelf.Target as IPDFViewController;
 			}
+		}
+
+		partial void TestButton_TouchUpInside(UIButton sender)
+		{
+			//ImageHelper.RunTest(9);
 		}
 
 		public IPDFViewController() : base ("IPDFViewController", null)
@@ -42,15 +50,7 @@ namespace PicTap
 		{
 			base.ViewDidLoad();
 
-			/*	separate simulator testing
-
-			await Task.Delay(2000);
-			await PostImageRecognitionActions.OpenIn("firstname", "secondname",
-												  new CNLabeledValue<CNPhoneNumber>[] {
-				new CNLabeledValue<CNPhoneNumber>("mobile", new CNPhoneNumber("09163247357"))}, "World");
-			/
-			await Task.Delay(2000);
-			AdFactory.AddToWindow();*/
+			GlobalVariables.VCToInvokeOnMainThread = this;
 
 			weakSelf = new WeakReference(this);
 			if (weakSelf == null) Console.WriteLine("weakSelf is null"); else Console.WriteLine("not null");
@@ -58,6 +58,11 @@ namespace PicTap
 			ipdfView.SetupCameraView();
 			ipdfView.EnableBorderDetection = true;
 			ipdfView.EnableTorch = false;
+			ipdfView.CameraViewType = IPDFCameraViewType.Normal;
+			dismissTap = null;
+
+			//AdFactory.AdjustViewControllerLayoutForAds(this);
+			//this.SetCanDisplayBannerAds(true)
 		}
 
 		public override void ViewDidAppear(bool animated)
@@ -69,6 +74,9 @@ namespace PicTap
 			ipdfView.AddGestureRecognizer(focusTap);
 
 			ipdfView.Start();
+
+			//UserInteractionHelper.CheckIfPremiumShowAdsIfNot();
+			UserInteractionHelper.StoreUserEmail();
 		}
 
 		partial void ChoosePhotoButton_TouchUpInside(UIButton sender)
@@ -79,8 +87,31 @@ namespace PicTap
 		async Task ChoosePhoto() { 
 			var photoStream = await PhotoPickerService.ChoosePicture();
 			if (photoStream != null) {
-				await ImageHelper.loadContactsFromPic(photoStream, true);
+				loadContactsFromPic(ImageHelper.GetUIImageFromStream(photoStream), true);
 			}
+		}
+
+		public async void loadContactsFromPic(UIImage transformedcropped, bool saveProcessedImage)
+		{
+			Console.WriteLine("In loadContactsFromPic");
+			CaptureBtn.Enabled = false;
+			ChoosePhotoButton.Enabled = false;
+			FlashButton.Enabled = false;
+
+			//Preprocess image for better text recognition results - adds too much overhead time
+			//Stream preProcessedStream = await PreprocessUIImage(transformedcropped);
+
+			//save for testing purposes
+			//if (saveProcessedImage) SaveImageToPhotosApp(preProcessedStream, System.DateTime.Now.Second + "bwsharp.png");
+
+			//ReadBusinessCardThenSaveExportHandleTimeout(GetStreamFromUIImage(transformedcropped));
+			await ImageHelper.ReadBusinessCardThenSaveExport(ImageHelper.GetStreamFromUIImage(
+				transformedcropped), ProgressBar, loadingView);//, new CancellationToken(), true);
+
+			CaptureBtn.Enabled = true;
+			ChoosePhotoButton.Enabled = true;
+			FlashButton.Enabled = true;
+			Console.WriteLine("loadContactsFromPic Done");
 		}
 
 		void focusGesture(UITapGestureRecognizer sender)
@@ -130,22 +161,22 @@ namespace PicTap
 					UIControlState.Normal);
 		}
 
-		void changeDetectButton(NSString title) { 
+		/*void changeDetectButton(NSString title) { 
 			FilterButton.SetImage(UIImage.FromFile(
 				(title.Contains(singleDetect)) ? "singledetect.png" : "multidetect.png"),
 				UIControlState.Normal);
-		}
+		}*/
 
-		void dismissPreview(UITapGestureRecognizer dismissTap)
+		void dismissPreview(UITapGestureRecognizer dismissTapParam)
 		{
 			Console.WriteLine("dismiss tap");
 			UIView.Animate(0.7, 0, UIViewAnimationOptions.AllowUserInteraction,
 				() =>
 				{
-					dismissTap.View.Frame = CGRect.Inflate(this.View.Bounds, 0, this.View.Bounds.Size.Height);
+					dismissTapParam.View.Frame = CGRect.Inflate(this.View.Bounds, 0, this.View.Bounds.Size.Height);
 				},
 			     ()=> {
-					 dismissTap.View.RemoveFromSuperview();
+					 dismissTapParam.View.RemoveFromSuperview();
 				}
 			);
 		}
@@ -180,7 +211,7 @@ namespace PicTap
 			);
 		}
 
-		partial void CaptureButton_TouchUpInside(UIButton sender)
+		/*partial void CaptureButton_TouchUpInside(UIButton sender)
 		{
 			this.ipdfView.CaptureImageWithCompletionHander(new Action<NSString>((NSString imageFilePath) =>
 			{
@@ -203,19 +234,19 @@ namespace PicTap
 					},
 					async () =>
 					{
-						await ImageHelper.loadContactsFromPic(captureImageView.Image, true);
+						await ImageHelper.loadContactsFromPic(captureImageView.Image, true, true, View);
 						dismissTap.View.RemoveFromSuperview();
 					}
 				);
 			}));
-		}
+		}*/
 
-		partial void FilterButton_TouchUpInside(UIButton sender)
+		/*partial void FilterButton_TouchUpInside(UIButton sender)
 		{
 			this.ipdfView.CameraViewType = (this.ipdfView.CameraViewType == IPDFCameraViewType.BlackAndWhite) ?
 				IPDFCameraViewType.Normal : IPDFCameraViewType.BlackAndWhite;
 			//this.updateTitleLabel();
-		}
+		}*/
 
 		partial void FlashButton_TouchUpInside(UIButton sender)
 		{
@@ -230,6 +261,37 @@ namespace PicTap
 			{
 				Console.WriteLine("IPDFCameraViewController.ipdfView.torchToggle error: {0}", e.Message);
 			}
+		}
+
+		partial void CaptureBtn_TouchUpInside(UIButton sender)
+		{
+			this.ipdfView.CaptureImageWithCompletionHander(new Action<NSString>((NSString imageFilePath) =>
+			{
+				captureImageView = new UIImageView(new UIImage(imageFilePath));
+				captureImageView.BackgroundColor = UIColor.White;
+				captureImageView.BackgroundColor.ColorWithAlpha((nfloat)0.7);
+				captureImageView.Frame = CGRect.Inflate(WeakSelf.View.Bounds, 0, -WeakSelf.View.Bounds.Size.Height);
+				captureImageView.Alpha = (nfloat)1.0;
+				captureImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
+				captureImageView.UserInteractionEnabled = true;
+				WeakSelf.View.AddSubview(captureImageView);
+
+				dismissTap = new UITapGestureRecognizer(dismissPreview);
+				captureImageView.AddGestureRecognizer(dismissTap);
+
+				UIView.Animate(0.7, 0, UIViewAnimationOptions.AllowUserInteraction,
+					() =>
+					{
+						captureImageView.Frame = WeakSelf.View.Bounds;
+					},
+					async () =>
+					{
+						loadContactsFromPic(captureImageView.Image, true);//move to before task.delay? it will feel faster for user
+						await Task.Delay(2000);
+						dismissTap.View.RemoveFromSuperview();
+					}
+				);
+			}));
 		}
 	}
 }

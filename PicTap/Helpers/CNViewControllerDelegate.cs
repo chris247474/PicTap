@@ -13,10 +13,8 @@ namespace PicTap
 			Console.WriteLine ("In DidComplete");
 			ContactsHelper.DismissCNContactViewControllerWithToolBarItemsOutsideUINavigationController(true, null);
 
-			try{
-			}catch(Exception e){
-				ContactsHelper.DismissCNContactViewControllerWithToolBarItemsOutsideUINavigationController(true, null);
-				Console.WriteLine ("CNViewControllerDelegate error: {0}", e.Message);
+			if (!Settings.IsPremiumSettings) {
+				AdFactory.ShowInterstitial();
 			}
 		}
 		bool FieldsFilled(CNContact contact){

@@ -14,6 +14,7 @@ using GPUImage.Filters.ColorProcessing;
 using System.Threading;
 using Microsoft.ProjectOxford.Vision.Contract;
 using Microsoft.ProjectOxford.Vision;
+using Tesseract.iOS;
 
 namespace PicTap
 {
@@ -48,27 +49,7 @@ namespace PicTap
 			contact = new CNMutableContact();
 		}
 
-		/*public async Task<IEnumerable<Tesseract.Result>> loadFromPicDivideBy(
-			Tesseract.PageIteratorLevel pageLevel, Stream s)
-		{
 
-			Console.WriteLine("INIT TESSERACT -------------------------------------------------------------------------------------");
-
-			TesseractApi api = new TesseractApi();
-			try
-			{
-				if (await api.Init("eng"))
-					if (await api.SetImage(s))
-						return api.Results(pageLevel);
-
-			}
-			catch (Exception e)
-			{
-				System.Console.WriteLine("[Pics.loadFromPicDivideBy] Error loading picture: " + e.Message);
-			}
-
-			return null;
-		}*/
 
 		public async Task ShowUserCropIfTextRecognitionTakesTooLong(Stream bwSharpenedStream)
 		{
@@ -270,15 +251,6 @@ namespace PicTap
 				Console.WriteLine("No email found in this textline");
 			};
 			return null;
-		}
-
-		public async Task<MatchFormat> ReadAnyAddressReturnMatchAndRemainderString(string input)
-		{
-			throw new NotImplementedException();
-		}
-		public async Task<MatchFormat> ReadAnyOrgReturnMatchAndRemainderString(string input)
-		{
-			throw new NotImplementedException();
 		}
 
 		public async Task<MatchFormat> ReadAnyURLReturnMatchAndRemainderString(string input)
@@ -715,12 +687,22 @@ namespace PicTap
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is complete
 		}*/
 
-		/*public async Task<Tesseract.Result[]> ExtractTextFromImage(Stream preprocessedimage,
-		   Tesseract.PageIteratorLevel recognitionLevel = Tesseract.PageIteratorLevel.Textline)
+		public async Task<List<Tesseract.Result>> ExtractTextFromImage_Tesseract(Stream image,
+		    Tesseract.PageIteratorLevel recognitionLevel = Tesseract.PageIteratorLevel.Textline)
 		{
-			var imageResult = (await
-							   loadFromPicDivideBy(recognitionLevel,
-									preprocessedimage)).ToArray();
+			List<Tesseract.Result> imageResult = null;
+			TesseractApi api = new TesseractApi();
+			try
+			{
+				if (await api.Init("eng"))
+					if (await api.SetImage(image))
+					imageResult = api.Results(recognitionLevel).ToList();
+
+			}
+			catch (Exception e)
+			{
+				System.Console.WriteLine("[Pics.loadFromPicDivideBy] Error loading picture: " + e.Message);
+			}
 
 			if (imageResult == null)
 			{
@@ -728,7 +710,7 @@ namespace PicTap
 			}
 
 			return imageResult;
-		}*/
+		}
 
 		public async Task<string> ExtractTextFromImage_ProjectOxford(Stream image)
 		{
@@ -757,13 +739,18 @@ namespace PicTap
 		public async Task<OcrResults> ExtractOCRResultFromImage_ProjectOxford(Stream image)
 		{
 			Console.WriteLine("In ExtractTextFromImage_ProjectOxford");
-			OcrResults result = new OcrResults();
-			var client = new VisionServiceClient("53ffa1a4499e42caa902805119e297e2");
+			try { 
+				OcrResults result = new OcrResults();
+				var client = new VisionServiceClient("53ffa1a4499e42caa902805119e297e2");
 
-			result = await client.RecognizeTextAsync(image, "en");
-			Console.WriteLine("language : {0}", result.Language);
+				result = await client.RecognizeTextAsync(image, "en");
+				Console.WriteLine("language : {0}", result.Language);
 
-			return result;
+				return result;
+			} catch (Exception e) {
+				Console.WriteLine("Microsoft OCR error: {0}", e.InnerException.Message);
+			}
+			return null;
 		}
 
 		public void ReadBusinessCardThenSaveExportHandleTimeout(Stream image)
@@ -792,13 +779,151 @@ namespace PicTap
 			
 		}
 
-		public async Task ReadBusinessCardThenSaveExport(Stream image, UIProgressView progressBar, 
+		public async Task ReadBusinessCardThenSaveExport_Tesseract(UIImage image, UIProgressView progressBar, 
+		                                                           UIActivityIndicatorView loadingView)
+		{
+			Console.WriteLine("in ReadBusinessCardThenSaveExport_Tesseract");
+
+			if (image == null) throw new ArgumentNullException("Illegal null value passed to ImagePreprocessor" +
+															   ".ReadBusinessCardThenSaveExport(stream)");
+			ResetContactReaderData();
+			int progressCtr = 0;
+
+			ShowStartLoading(progressBar, loadingView);
+
+			//Preprocess image for better text recognition results - adds too much overhead time
+			Stream preProcessedStream = await PreprocessUIImage(image);
+
+			//save for testing purposes
+			//SaveImageToPhotosApp(preProcessedStream, System.DateTime.Now.Second + "bwsharp.png");
+
+			var result = await ExtractTextFromImage_Tesseract(preProcessedStream);
+			var totalLines = (float)result.Count();
+			var textline = string.Empty;
+			var wholeTextForClipboard = string.Empty;
+
+			foreach(var line in result)
+			{
+				Console.WriteLine("In lines");
+				wholeTextForClipboard += "\n" + line.Text;
+				textline = line.Text;
+				progressCtr++;
+				var readingProgress = progressBar.Progress + (float)(progressCtr / totalLines);
+				progressBar.SetProgress(readingProgress, true);
+				goToNextIteration = false;//reset
+
+				//compare line to regex
+				Console.WriteLine("about to process textline: nameFound? {0}", nameFound);
+				if (!nameFound)
+				{
+					nameFound = IsName(line.Text);
+					if (nameFound)
+					{
+						goToNextIteration = true;
+						Console.WriteLine("Found name in text line, skipping to next line");
+					}
+					else goToNextIteration = false;
+				}
+				Console.WriteLine("Done checking for name, gotonextiteration {0}", goToNextIteration);
+				if (goToNextIteration) continue;
+
+				Console.WriteLine("about to process textline for number: numFound? {0}", numFound);
+				numFound = IsNumber(line.Text);
+				if (numFound)
+				{
+					goToNextIteration = true;
+					Console.WriteLine("Found number in text line, skipping to next line");
+				}
+				else goToNextIteration = false;
+				Console.WriteLine("Done checking for num, gotonextiteration {0}", goToNextIteration);
+				if (goToNextIteration) continue;
+
+				Console.WriteLine("about to process textline for org: orgFound? {0}", orgFound);
+				if (!orgFound)
+				{
+					orgFound = IsOrg(line.Text);
+					if (orgFound)
+					{
+						goToNextIteration = true;
+						Console.WriteLine("Found org in text line, skipping to next line");
+					}
+					else goToNextIteration = false;
+				}
+				Console.WriteLine("Done checking for org, gotonextiteration {0}", goToNextIteration);
+				if (goToNextIteration) continue;
+
+				Console.WriteLine("about to process textline for EMAIL: emailFound? {0}", emailFound);
+				if (!emailFound)
+				{
+					emailFound = IsEmail(line.Text);
+					if (emailFound)
+					{
+						goToNextIteration = true;
+						Console.WriteLine("Found email in text line, skipping to next line");
+					}
+					else goToNextIteration = false;
+				}
+				Console.WriteLine("Done checking for email, gotonextiteration {0}", goToNextIteration);
+				if (goToNextIteration) continue;
+
+				Console.WriteLine("about to process textline for URL: URLFound? {0}", URLFound);
+				if (!URLFound)
+				{
+					URLFound = IsURL(line.Text);
+					if (URLFound)
+					{
+						goToNextIteration = true;
+						Console.WriteLine("Found URL in text line, skipping to next line");
+					}
+					else goToNextIteration = false;
+				}
+				Console.WriteLine("Done checking for URL, gotonextiteration {0}", goToNextIteration);
+				if (goToNextIteration) continue;
+
+				CheckAddress(line.Text);
+
+				Console.WriteLine("about to process textline: jobFound? {0}", jobFound);
+				if (!jobFound)
+				{
+					jobFound = IsJob(line.Text);
+					if (jobFound)
+					{
+						goToNextIteration = true;
+						Console.WriteLine("Found job in text line, skipping to next line");
+					}
+					else goToNextIteration = false;
+				}
+				Console.WriteLine("Done checking for job, gotonextiteration {0}", goToNextIteration);
+				if (goToNextIteration) continue;
+			}
+
+			//for some reason, only first call to SaveAddressToContact() actually saves to CNPostalAddress, 
+			//so call after loop for now
+			SaveAddressToContact();
+
+			ShowDoneLoading(progressBar, loadingView);
+			PostImageRecognitionActions.OpenIn(contact, wholeTextForClipboard);
+		}
+
+		void ShowStartLoading(UIProgressView progressBar, UIActivityIndicatorView loadingView)
+		{
+			progressBar.Hidden = false;
+			loadingView.StartAnimating();
+			progressBar.SetProgress(0.25f, true);
+		}
+			async void ShowDoneLoading(UIProgressView progressBar, UIActivityIndicatorView loadingView) { 
+			progressBar.SetProgress(1.0f, true);
+			await Task.Delay(1000);
+			progressBar.Hidden = true;
+			loadingView.StopAnimating();
+			progressBar.SetProgress(0.0f, false);
+		}
+
+		public async Task ReadBusinessCardThenSaveExport_MicrosoftVision(Stream image, UIProgressView progressBar, 
 		                                                 UIActivityIndicatorView loadingView)//CancellationToken cancelToken,
 	                                                     //bool canTimeout = false) 
 		{
-			progressBar.SetProgress(0.0f, false);
-			progressBar.Hidden = false;
-			loadingView.StartAnimating();
+			ShowStartLoading(progressBar, loadingView);
 			
 			if (image == null) throw new ArgumentNullException("Illegal null value passed to ImagePreprocessor" +
 		                                                       ".ReadBusinessCardThenSaveExport(stream)");
@@ -807,7 +932,7 @@ namespace PicTap
 			//postalAddress = new CNMutablePostalAddress();
 			ResetContactReaderData();
 			int progressCtr = 0;
-			progressBar.SetProgress(0.5f, true);
+			string wholeTextForClipboard = "";
 
 			/*if (canTimeout){
 				Task.Run(async () =>
@@ -822,6 +947,7 @@ namespace PicTap
 				});
 			}*/
 			result = await ExtractOCRResultFromImage_ProjectOxford(image);
+			progressBar.SetProgress(0.5f, true);
 
 			foreach (var region in result.Regions)
 			{
@@ -829,6 +955,7 @@ namespace PicTap
 				foreach (var line in region.Lines)
 				{
 					Console.WriteLine("In lines");
+					wholeTextForClipboard += "\n" + CombineWordsIntoLine(line);
 					progressCtr++;
 					var readingProgress = progressBar.Progress + (float)(progressCtr / (float)region.Lines.Count());
 					progressBar.SetProgress(readingProgress, true);
@@ -924,12 +1051,8 @@ namespace PicTap
 			//so call after loop for now
 			SaveAddressToContact();
 
-			progressBar.SetProgress(1.0f, true);
-			await Task.Delay(1000);
-			progressBar.Hidden = true;
-			loadingView.StopAnimating();
-
-			PostImageRecognitionActions.OpenIn(contact);
+			ShowDoneLoading(progressBar, loadingView);
+			PostImageRecognitionActions.OpenIn(contact, wholeTextForClipboard);
 		}
 
 		bool IsOrg(string input) {
@@ -1475,6 +1598,9 @@ namespace PicTap
 			}
 			return lineText;
 		}
+		string[] SeparateTesseractResultIntoStringLines(string input) { 
+			return input.Split(new char[] { '\n' });
+		}
 
 		/*public async Task ReadAnyBusinessCardThenSaveOrExport(Stream bwSharpenedStream) {
 			//check line: is it a name, number, company, url, etc - then call the matching function
@@ -1826,7 +1952,7 @@ namespace PicTap
 
 		public async Task<Stream> PreprocessUIImage(UIImage transformedcroppedimage)//, double GaussianSizeX, double GaussianSizeY)
 		{
-			//Console.WriteLine("in PreprocessImage:file");
+			Console.WriteLine("in PreprocessImage");
 
 			if (transformedcroppedimage != null) {
 				//UserDialogs.Instance.ShowLoading ("Cleaning Image...");
@@ -1838,7 +1964,6 @@ namespace PicTap
 				UIImage finalImage = (adaptiveThreshImage == null) ? sharpenedImage : adaptiveThreshImage;
 
 				var result = GetStreamFromUIImage(finalImage);
-				//UserDialogs.Instance.HideLoading();
 
 				//var result = GetStreamFromUIImage(ApplyGreyScale(transformedcroppedimage));
 				

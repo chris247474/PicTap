@@ -28,10 +28,6 @@ namespace PicTap
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UIImageView focusIndicator { get; set; }
-
-        [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
         IPDFCamera_Binding.IPDFCamera ipdfView { get; set; }
 
         [Outlet]
@@ -81,11 +77,6 @@ namespace PicTap
             if (FlashButton != null) {
                 FlashButton.Dispose ();
                 FlashButton = null;
-            }
-
-            if (focusIndicator != null) {
-                focusIndicator.Dispose ();
-                focusIndicator = null;
             }
 
             if (ipdfView != null) {

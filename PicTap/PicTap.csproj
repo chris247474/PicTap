@@ -85,6 +85,7 @@
     <MtouchHttpClientHandler>HttpClientHandler</MtouchHttpClientHandler>
     <MtouchTlsProvider>Default</MtouchTlsProvider>
     <PlatformTarget>x86</PlatformTarget>
+    <IOSDebugOverWiFi>true</IOSDebugOverWiFi>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -138,6 +139,15 @@
     </Reference>
     <Reference Include="Xamarin.Mobile">
       <HintPath>..\Components\xamarin.mobile-0.7.7\lib\ios-unified\Xamarin.Mobile.dll</HintPath>
+    </Reference>
+    <Reference Include="Tesseract.Binding.iOS">
+      <HintPath>..\packages\Xamarin.Tesseract.0.3.2\lib\Xamarin.iOS10\Tesseract.Binding.iOS.dll</HintPath>
+    </Reference>
+    <Reference Include="Tesseract">
+      <HintPath>..\packages\Xamarin.Tesseract.0.3.2\lib\Xamarin.iOS10\Tesseract.dll</HintPath>
+    </Reference>
+    <Reference Include="Tesseract.iOS">
+      <HintPath>..\packages\Xamarin.Tesseract.0.3.2\lib\Xamarin.iOS10\Tesseract.iOS.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -210,6 +220,9 @@
     <Compile Include="Helpers\GlobalVariables.cs" />
     <Compile Include="Helpers\ImagePreProcessor.cs" />
     <Compile Include="Helpers\UserInteractionHelper.cs" />
+    <Compile Include="Helpers\NetworkStatusType.cs" />
+    <Compile Include="Helpers\ClipBoardService.cs" />
+    <Compile Include="Helpers\EmailService.cs" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\capture_button%402x.png" />
@@ -241,6 +254,16 @@
     <BundleResource Include="Resources\Gallery.png" />
     <BundleResource Include="Resources\Gallery%402x.png" />
     <BundleResource Include="Resources\Gallery%403x.png" />
+    <BundleResource Include="Resources\tessdata\.DS_Store" />
+    <BundleResource Include="Resources\tessdata\eng.cube.bigrams" />
+    <BundleResource Include="Resources\tessdata\eng.cube.fold" />
+    <BundleResource Include="Resources\tessdata\eng.cube.lm" />
+    <BundleResource Include="Resources\tessdata\eng.cube.nn" />
+    <BundleResource Include="Resources\tessdata\eng.cube.params" />
+    <BundleResource Include="Resources\tessdata\eng.cube.size" />
+    <BundleResource Include="Resources\tessdata\eng.cube.word-freq" />
+    <BundleResource Include="Resources\tessdata\eng.tesseract_cube.nn" />
+    <BundleResource Include="Resources\tessdata\eng.traineddata" />
   </ItemGroup>
   <ItemGroup>
     <XamarinComponentReference Include="googleiosmobileads">

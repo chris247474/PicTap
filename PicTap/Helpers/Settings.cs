@@ -53,6 +53,23 @@ namespace PicTap
 		}
 	}
 
+	#region AskRating
+	private const string AskRatingKey = "askrating";
+	private static bool AskRatingDefault = false;
+	#endregion
+
+	public static bool UserRatedApp
+	{
+		get
+		{
+			return AppSettings.GetValueOrDefault<bool>(AskRatingKey, AskRatingDefault);
+		}
+		set
+		{
+			AppSettings.AddOrUpdateValue<bool>(AskRatingKey, value);
+		}
+	}
+
 	#region IsFirstRun
 	private const string IsFirstRunKey = "IsFirstRun";
 	private static bool IsFirstRunDefault = true;

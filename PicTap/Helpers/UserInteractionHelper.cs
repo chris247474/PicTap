@@ -6,7 +6,7 @@ using Acr.UserDialogs;
 namespace PicTap
 {
 	/// <summary>
-	/// Startup related functions. Usually called in AppDelegate/Main, except for StoreEmail method (sometimes crashes 
+	/// Startup/User account related functions. Usually called in AppDelegate/Main, except for StoreEmail method (sometimes crashes 
 	/// if root window is not yet setup/initialized)
 	/// </summary>
 	public static class UserInteractionHelper
@@ -14,6 +14,8 @@ namespace PicTap
 		public const string NEXTTIME = "Next Time";
 		public const string DONTREMIND = "Don't ask again";
 		public const int DAYSBEFOREASKINGFOREMAIL = 2;
+		public const int DAYSBEFOREASKINGFORRATING = 5;
+		public const int DAYSBEFOREASKINGFORPREMIUM = 7;
 
 		public static void SetInstallDateIfFirstRun()
 		{
@@ -32,12 +34,75 @@ namespace PicTap
 			Settings.IsPremiumSettings = isPremium;
 		}
 
+		public static async void OfferPremium() {
+			if (TimeToOfferPremium()) { 
+				var destroyAds = await UserDialogs.Instance.ConfirmAsync(
+					"Don't want ads?",
+					"Destroy those ads!",
+				   "Eradicate those ads!!", "I like ads");
+
+				if (destroyAds) { 
+					
+				} else {
+					
+				}
+			}
+		}
+
+		public static async Task AskForRating() {
+			if (TimeToAskForRating()) { 
+				var itsgreat = await UserDialogs.Instance.ConfirmAsync(
+					string.Format("Is {0} working for you?", Values.APPNAME),
+					string.Format("Liking {0} so far?", Values.APPNAME),
+				   "Yes!!", "There's some issues");
+				if (itsgreat)
+				{
+					var willReview = await UserDialogs.Instance.ConfirmAsync(
+						"Quick review?",
+						"Great!",
+						  "OK", "Later on");
+
+					if (willReview)
+					{
+						//link to app store, then mark Settings.UserRatedApp true
+						throw new NotImplementedException("No link to app store impl yet");
+					}
+				}
+				else {
+					throw new NotImplementedException("No recipient in feedback email yet");
+					EmailService.SendEmail("",
+					   string.Format("Hi! \n\n I've been running into the following issues with {0}: " +
+					   "\n\t * Please type any issues here and we'll be sure to do what we can to fix it for you! :) *",
+									 Values.APPNAME),
+					   "User feedback");
+				}
+			}
+		}
+
+		static bool TimeToOfferPremium()
+		{
+			var timetoask = (!Settings.IsPremiumSettings && !Settings.IsFirstRunSettings &&
+					DateTime.Today.Date >= Settings.InstallDateSettings.Date.AddDays(
+								 DAYSBEFOREASKINGFORPREMIUM) &&
+							 Settings.InstallDateSettings.Date > DateTime.MinValue.Date);
+			Debug.WriteLine("Time to offer premium: {0}", timetoask);
+			return timetoask;
+		}
 		static bool TimeToAskForEmail() {
 			var timetoask = (Settings.AskAgainSettings && !Settings.IsFirstRunSettings &&
 					DateTime.Today.Date >= Settings.InstallDateSettings.Date.AddDays(
 				                 DAYSBEFOREASKINGFOREMAIL) &&
 							 Settings.InstallDateSettings.Date > DateTime.MinValue.Date);
 			Debug.WriteLine("Time To ask for email: {0}", timetoask);
+			return timetoask;
+		}
+		static bool TimeToAskForRating()
+		{
+			var timetoask = (!Settings.UserRatedApp && !Settings.IsFirstRunSettings &&
+					DateTime.Today.Date >= Settings.InstallDateSettings.Date.AddDays(
+				                 DAYSBEFOREASKINGFORRATING) &&
+							 Settings.InstallDateSettings.Date > DateTime.MinValue.Date);
+			Debug.WriteLine("Time To ask for rating: {0}", timetoask);
 			return timetoask;
 		}
 

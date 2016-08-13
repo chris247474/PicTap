@@ -46,11 +46,17 @@ namespace PicTap
         {
         }
 
+		public override bool PrefersStatusBarHidden()
+		{
+			return true;
+		}
+
 		public override async void ViewDidLoad()
 		{
 			base.ViewDidLoad();
 
 			GlobalVariables.VCToInvokeOnMainThread = this;
+			//UIApplication.SharedApplication.SetStatusBarHidden(true, true);
 
 			weakSelf = new WeakReference(this);
 			if (weakSelf == null) Console.WriteLine("weakSelf is null"); else Console.WriteLine("not null");
@@ -70,8 +76,8 @@ namespace PicTap
 			Console.WriteLine("ViewDidAppear");
 			base.ViewDidAppear(animated);
 
-			UITapGestureRecognizer focusTap = new UITapGestureRecognizer(focusGesture);
-			ipdfView.AddGestureRecognizer(focusTap);
+			//UITapGestureRecognizer focusTap = new UITapGestureRecognizer(focusGesture);
+			//ipdfView.AddGestureRecognizer(focusTap);
 
 			ipdfView.Start();
 
@@ -98,15 +104,16 @@ namespace PicTap
 			ChoosePhotoButton.Enabled = false;
 			FlashButton.Enabled = false;
 
-			//Preprocess image for better text recognition results - adds too much overhead time
-			//Stream preProcessedStream = await PreprocessUIImage(transformedcropped);
-
-			//save for testing purposes
-			//if (saveProcessedImage) SaveImageToPhotosApp(preProcessedStream, System.DateTime.Now.Second + "bwsharp.png");
-
-			//ReadBusinessCardThenSaveExportHandleTimeout(GetStreamFromUIImage(transformedcropped));
-			await ImageHelper.ReadBusinessCardThenSaveExport(ImageHelper.GetStreamFromUIImage(
+			var internetStatus = Reachability.InternetConnectionStatus();
+			if (internetStatus == NetworkStatusType.NotReachable){
+				Console.WriteLine("No internet connection available, using Tesseract");
+				await ImageHelper.ReadBusinessCardThenSaveExport_Tesseract(transformedcropped, ProgressBar, loadingView);
+			}
+			else {
+				Console.WriteLine("Internet connection available, using Microsoft Vision");
+				await ImageHelper.ReadBusinessCardThenSaveExport_MicrosoftVision(ImageHelper.GetStreamFromUIImage(
 				transformedcropped), ProgressBar, loadingView);//, new CancellationToken(), true);
+			}
 
 			CaptureBtn.Enabled = true;
 			ChoosePhotoButton.Enabled = true;
@@ -114,7 +121,7 @@ namespace PicTap
 			Console.WriteLine("loadContactsFromPic Done");
 		}
 
-		void focusGesture(UITapGestureRecognizer sender)
+		/*void focusGesture(UITapGestureRecognizer sender)
 		{
 			Console.WriteLine("in focusGesture");
 			if (sender.State == UIGestureRecognizerState.Recognized)
@@ -129,7 +136,7 @@ namespace PicTap
 					this.focusIndicatorAnimateToPoint(location);
 				});
 			}
-		}
+		}*/
 
 		/*void updateTitleLabel()
 		{
@@ -190,7 +197,7 @@ namespace PicTap
 			Console.WriteLine("Done with IPDFCamera.SaveImage()");
 		}
 
-		void focusIndicatorAnimateToPoint(CGPoint targetPoint)
+		/*void focusIndicatorAnimateToPoint(CGPoint targetPoint)
 		{
 			this.focusIndicator.Center = targetPoint;
 			this.focusIndicator.Alpha = (nfloat)0.0;
@@ -209,7 +216,7 @@ namespace PicTap
 					});
 				}
 			);
-		}
+		}*/
 
 		/*partial void CaptureButton_TouchUpInside(UIButton sender)
 		{

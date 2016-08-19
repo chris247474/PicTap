@@ -15,18 +15,20 @@ using System.Threading;
 using Microsoft.ProjectOxford.Vision.Contract;
 using Microsoft.ProjectOxford.Vision;
 using Tesseract.iOS;
+using GPUImage.Filters.ImageProcessing;
+using Tesseract;
 
 namespace PicTap
 {
 	public class ImagePreProcessor
 	{
 		const int SUCCESSTHRESHOLD = 28;
-		public const double TIMEOUTLIMIT = 6000;
+		public const double TIMEOUTLIMIT = 8000;
 		CNMutableContact contact;
 		CNMutablePostalAddress postalAddress;
 		bool nameFound = false, numFound = false, emailFound = false, URLFound = false, //addressFound = false,
 				orgFound = false, goToNextIteration = false, streetFound = false, citypostalFound = false,
-				cityFound = false, jobFound = false;
+				cityFound = false, jobFound = false, allowCancelMicrosoftVisionOCRTask = false;
 
 		public ImagePreProcessor()
 		{
@@ -70,7 +72,7 @@ namespace PicTap
 
 
 
-		public async Task<MatchFormat> ReadAnyNameReturnMatchAndRemainderString(string input)
+		/*public async Task<MatchFormat> ReadAnyNameReturnMatchAndRemainderString(string input)
 		{
 			string[] words;
 			List<string> names = new List<string>();
@@ -302,9 +304,9 @@ namespace PicTap
 			CITextFeature ci = new CITextFeature();
 
 
-		}
+		}*/
 
-		/*public async Task<int> TesseractExtractText(Stream s, Tesseract.OcrEngineMode engineMode,
+		public async Task<int> TesseractExtractText(Stream s, Tesseract.OcrEngineMode engineMode,
 										  Tesseract.PageSegmentationMode segMode, string correctOutput, int ctr = 0)
 		{
 			Console.WriteLine("Begin Tesseract Test: EngineMode {0}, SegmentationMode: {1}",
@@ -312,13 +314,11 @@ namespace PicTap
 							  segMode);
 
 			string text = string.Empty;
-			//TesseractApi api = new TesseractApi();
 			int LD = 1000000;
 
 			try
 			{
-
-				text = await ExtractTextFromImage_ProjectOxford(s);
+				text = await /*ExtractTextFromImage_Tesseract(s, segMode, engineMode);*/ExtractTextFromImage_ProjectOxford(s);//, segMode, engineMode);//ExtractTextFromImage_ProjectOxford(s);
 
 				Console.WriteLine("Extracted text is {0}\n", text);
 				Console.WriteLine("Correct output is {0}\n", correctOutput);
@@ -331,13 +331,13 @@ namespace PicTap
 			}
 
 			Console.WriteLine("Test #{0} done", ctr);
-			return (LD > SUCCESSTHRESHOLD) ? 0 : 1;
-		}*/
+			return (LD >= SUCCESSTHRESHOLD) ? 0 : 1;
+		}
 
-		/*public async Task<int> ExtractTextTest(Stream s, Tesseract.OcrEngineMode engineMode,
+		public async Task<int> ExtractTextTest(Stream s, Tesseract.OcrEngineMode engineMode,
 										  Tesseract.PageSegmentationMode segMode, string correctOutput, int ctr)
 		{//create auto test functions and data
-			Console.WriteLine("INIT TESSERACT -------------------------------------------------------------------------------------");
+			//Console.WriteLine("INIT TESSERACT -------------------------------------------------------------------------------------");
 			string text = string.Empty;
 			int successScore = 0;
 
@@ -393,7 +393,7 @@ namespace PicTap
 			//correctText.Add("");
 
 			return correctText.ToArray();
-		}*/
+		}
 
 
 
@@ -401,223 +401,127 @@ namespace PicTap
 		{
 			List<TestData> averageScores = new List<TestData>();
 
-			/*for (int c = 0; c < inputImages.Length; c++) {
-				Console.WriteLine("Adding image {0} to test array", c);
-				var s = await PreprocessUIImage(inputImages[c]);
-				SaveImageToPhotosApp(s, "");
-				inputImages[c] = GetUIImageFromStream(s);
-				Console.WriteLine("Done adding image {0} to test array", c);
-			}*/
+			for (int c = 0; c < inputImages.Length; c++) {
+				Console.WriteLine("processing image {0} for test array", c);
+				var preProcessedImage = await PreprocessUIImage(inputImages[c], true);
+				//var scaledImage = ScaleImage(inputImages[c]);
+				inputImages[c] = preProcessedImage;
+				Console.WriteLine("Done processing image {0} for test array", c);
+			}
 
 			UserDialogs.Instance.ShowLoading();
 
 			//tesseract only - all possible pagesegmentationmodes
 			//await TaskHelper.RunTaskThenCancelAfterTimeout(async () => {
-			//averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
-			//										Tesseract.PageSegmentationMode.Auto));
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
+											Tesseract.PageSegmentationMode.Auto));
 			//});
 
-			/*await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
+			/*averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
 														Tesseract.PageSegmentationMode.AutoOsd));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
 													Tesseract.PageSegmentationMode.CircleWord));
-			});
 
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
 													Tesseract.PageSegmentationMode.SingleBlock));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
 													Tesseract.PageSegmentationMode.SingleBlockVertText));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
 													Tesseract.PageSegmentationMode.SingleChar));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
 													Tesseract.PageSegmentationMode.SingleColumn));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
 													Tesseract.PageSegmentationMode.SingleLine));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
 													Tesseract.PageSegmentationMode.SingleWord));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
 													Tesseract.PageSegmentationMode.SparseText));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractOnly,
 													Tesseract.PageSegmentationMode.SparseTextOsd));
-			});
 
 
 			//cubonly - all possible segmentationmodes
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
 														Tesseract.PageSegmentationMode.Auto));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
 														Tesseract.PageSegmentationMode.AutoOsd));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
 													Tesseract.PageSegmentationMode.CircleWord));
-			});
 
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
 													Tesseract.PageSegmentationMode.SingleBlock));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
 													Tesseract.PageSegmentationMode.SingleBlockVertText));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
 													Tesseract.PageSegmentationMode.SingleChar));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
 													Tesseract.PageSegmentationMode.SingleColumn));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
 													Tesseract.PageSegmentationMode.SingleLine));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
 													Tesseract.PageSegmentationMode.SingleWord));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
 													Tesseract.PageSegmentationMode.SparseText));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.CubeOnly,
 													Tesseract.PageSegmentationMode.SparseTextOsd));
-			});
 
 
 			//combined - all possible segmentationmodes
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
 														Tesseract.PageSegmentationMode.Auto));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
 														Tesseract.PageSegmentationMode.AutoOsd));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
 													Tesseract.PageSegmentationMode.CircleWord));
-			});
 
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
 													Tesseract.PageSegmentationMode.SingleBlock));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
 													Tesseract.PageSegmentationMode.SingleBlockVertText));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
 													Tesseract.PageSegmentationMode.SingleChar));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
 													Tesseract.PageSegmentationMode.SingleColumn));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
 													Tesseract.PageSegmentationMode.SingleLine));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
 													Tesseract.PageSegmentationMode.SingleWord));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
 													Tesseract.PageSegmentationMode.SparseText));
-			});
 
-			await TaskHelper.RunTaskThenCancelAfterTimeout(async () =>
-			{
-				averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
+			averageScores.Add(await GetAverageScore(inputImages, Tesseract.OcrEngineMode.TesseractCubeCombined,
 													Tesseract.PageSegmentationMode.SparseTextOsd));
-			});*/
 
 			Console.WriteLine("Done with all possible combinations of OcrengineModes and PagesegmentationModes");
-
+*/
 			foreach (TestData score in averageScores)
 			{
 				Console.WriteLine("\n\n\n ----------- Average score for config {0}, {1} is {2} -----------", score.engineName, score.segName, score.Average);
@@ -626,7 +530,7 @@ namespace PicTap
 			UserDialogs.Instance.HideLoading();
 		}
 
-		/*public async Task<TestData> GetAverageScore(UIImage[] inputImages, Tesseract.OcrEngineMode engineMode,
+		public async Task<TestData> GetAverageScore(UIImage[] inputImages, Tesseract.OcrEngineMode engineMode,
 									   Tesseract.PageSegmentationMode segMode)
 		{
 			try
@@ -638,7 +542,8 @@ namespace PicTap
 				for (int c = 0; c < inputImages.Length; c++)
 				{
 					var image = GetStreamFromUIImage(inputImages[c]);
-					successScores.Add(await ExtractTextTest(image, engineMode, segMode, correctStringOutputs[c], c));
+					successScores.Add(await ExtractTextTest(image, engineMode, 
+					     segMode, correctStringOutputs[c], c));
 				}
 
 				foreach (int score in successScores)
@@ -658,15 +563,19 @@ namespace PicTap
 			{
 				Console.WriteLine("Error in GetAverageScore: {0}", e.Message);
 			}
-
-			return null;
 			//Console.WriteLine("----------- AVERAGE SUCCESS SCORE: TesseractOnly, AutoOnly IS {0} ----------------", average);
-		}*/
 
-		/*public void RunTest(int imageCount)
+			return new TestData
+			{
+				Average = 0,
+				engineName = engineMode.ToString(),
+				segName = segMode.ToString()
+			};
+		}
+
+		public void RunTest(int imageCount)
 		{
 			var images = new List<UIImage>();
-
 			int c = 0;
 
 			try
@@ -685,23 +594,71 @@ namespace PicTap
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is complete
 			RunBusinessCardTest(images.ToArray());
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is complete
-		}*/
+		}
 
-		public async Task<List<Tesseract.Result>> ExtractTextFromImage_Tesseract(Stream image,
-		    Tesseract.PageIteratorLevel recognitionLevel = Tesseract.PageIteratorLevel.Textline)
-		{
-			List<Tesseract.Result> imageResult = null;
+		public async Task<string> ExtractTextFromImage_Tesseract(Stream image, PageSegmentationMode pageMode, 
+		                                                         OcrEngineMode engMode,
+			Tesseract.PageIteratorLevel recognitionLevel = Tesseract.PageIteratorLevel.Textline)
+		{ 
+			Tesseract.Result[] imageResult = null;
+			var text = string.Empty;
 			TesseractApi api = new TesseractApi();
 			try
 			{
-				if (await api.Init("eng"))
+				if (await api.Init("eng")){
+					api.SetPageSegmentationMode(pageMode);
+					api.SetOcrEngineMode(engMode);
+					api.MaximumRecognitionTime = TIMEOUTLIMIT / 1000;
+					//Console.WriteLine("Running tesseract on config: {0}, {1}", pageMode, engMode);
+
 					if (await api.SetImage(image))
-					imageResult = api.Results(recognitionLevel).ToList();
+						imageResult = api.Results(recognitionLevel).ToArray();//ToList();
+					}
 
 			}
 			catch (Exception e)
 			{
-				System.Console.WriteLine("[Pics.loadFromPicDivideBy] Error loading picture: " + e.Message);
+				System.Console.WriteLine("[ExtractTextFormImage_Tesseract] Error loading picture: " + e.Message);
+			}
+
+			if (imageResult == null)
+			{
+				UserDialogs.Instance.Alert("Couldn't read the image", "Pls try again", "OK");
+			}
+
+			Console.WriteLine("{0} lines in extracted text", imageResult.Length);
+			for (int c = 0; c < imageResult.Length; c++) {
+				Console.WriteLine("line {0}:{1}", c, imageResult[c].Text);
+				text += imageResult[c].Text + "\n";
+			}
+			return text;
+		}
+
+		public async Task<List<Tesseract.Result>> ExtractResultFromImage_Tesseract(Stream image,
+		    Tesseract.PageIteratorLevel recognitionLevel = Tesseract.PageIteratorLevel.Textline)
+		{
+			List<Tesseract.Result> imageResult = null;
+			TesseractApi api = new TesseractApi();
+
+			Console.WriteLine("api null? {0}", api == null);
+			try
+			{
+				if (await api.Init("eng"))
+				{
+					api.SetPageSegmentationMode(PageSegmentationMode.Auto);
+					api.SetOcrEngineMode(OcrEngineMode.TesseractCubeCombined);
+					api.MaximumRecognitionTime = TIMEOUTLIMIT / 1000;
+
+					if (await api.SetImage(image))
+					{
+						imageResult = api.Results(recognitionLevel).ToList();
+					}
+				}
+
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("[ExtractResultFromImage_Tesseract] Error loading picture: " + e.Message);
 			}
 
 			if (imageResult == null)
@@ -753,51 +710,170 @@ namespace PicTap
 			return null;
 		}
 
-		public void ReadBusinessCardThenSaveExportHandleTimeout(Stream image)
+		public async void ReadBusinessCardThenSaveExportHandleTimeout_MicrosoftVision(UIImage image, UIProgressView progressBar,
+			UIActivityIndicatorView loadingView)
 		{
+			UIImage preProcessedImage = null;
+			/*Task.Factory.StartNew(async () =>
+			{
+				preProcessedImage = await PreprocessUIImage(image, false);//check sharpening quality
+			});*/
+
 			var cancelTokenSource = new CancellationTokenSource();
 			var cancelToken = cancelTokenSource.Token;
 
-			try
-			{
-				var readTask = Task.Run(() => {
-					//ReadBusinessCardThenSaveExport(image, cancelToken, true);
+			var readTask = Task.Factory.StartNew(() => {
+				//ReadBusinessCardThenSaveExport_MicrosoftVision(
+				//	GetStreamFromUIImage(image), progressBar, loadingView, cancelToken, true);
+
+				Task.Run(() => { 
+					for (int c = 0; !cancelToken.IsCancellationRequested; c++)
+					{
+						Console.WriteLine("do something do something do something");
+						cancelToken.ThrowIfCancellationRequested();
+						Console.WriteLine("CancelToken cancelled: {0}",
+										  cancelToken.IsCancellationRequested);
+					}
 				}, cancelToken);
-			//cancelTokenSource.CancelAfter((int)TIMEOUTLIMIT);
-			//await Task.Delay((int)TIMEOUTLIMIT+200);
-			//Console.WriteLine("Disposing readTask");
-			//readTask.Dispose();
-			//readTask = null;
-			//Console.WriteLine("readTask is null: {0}", readTask == null);
-			}
-			catch (TimeoutException te)
+			}, cancelToken);
+			//readTask.Start();
+			while (readTask.Status != TaskStatus.Running)
 			{
-				Console.WriteLine("ReadBusinessCardThenSaveExport error: {0}", te.Message);
-				//UserDialogs.Instance.Alert("Image could not be read", "Oops", "OK");
+				//Wait until task is running
+				Console.WriteLine("Not yet running");
 			}
 
-			
+			try
+			{
+				for (int c = 0; c < 6; c++) {
+					await Task.Delay(1000);
+					Console.WriteLine("cancel countdown: {0}", c);
+				}
+				cancelTokenSource.Cancel();
+				Console.WriteLine("cancelTokenSource.Cancel(): {0}, cancelToken: {1}", 
+				                  cancelTokenSource.IsCancellationRequested, 
+				                  cancelToken.IsCancellationRequested);
+				/*for (int i = 0; i < TIMEOUTLIMIT / 1000; i++)
+				{
+					await Task.Delay(1000);
+					if (i == (int)((TIMEOUTLIMIT / 1000) - 1)) cancelTokenSource.Cancel();
+					Console.WriteLine("outside task Timing {1}... cancel? {0}",
+									  cancelTokenSource.Token.IsCancellationRequested,
+									 i);
+				}*/
+				/*
+				if (cancelTokenSource.IsCancellationRequested)
+				{
+					Console.WriteLine(
+							"After timeout: Cancellation requested: {0}, cancel Vision OCR? {1}, readTask cancelled? {2}",
+								  cancelTokenSource.IsCancellationRequested,
+									allowCancelMicrosoftVisionOCRTask, readTask.IsCanceled);
+					//readTask.Dispose();
+					//readTask = null;
+
+					if (allowCancelMicrosoftVisionOCRTask)
+					{
+						if (preProcessedImage == null)
+						{
+							Console.WriteLine("Preprocessing not yet done, starting delay loop");
+							for (int c = 0; c < 2; c++)
+							{
+								var exitLoop = false;
+								await Task.Delay(500);
+								if (preProcessedImage != null)
+								{
+									exitLoop = true;
+									Console.WriteLine(
+										"Preprocessing done, calling tesseract, exit loop {0}", exitLoop);
+									GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(async () =>
+										 await ReadBusinessCardThenSaveExport_Tesseract(preProcessedImage,
+																		   progressBar, loadingView,
+																				 false));
+								}
+								else Console.WriteLine("Preprocessing not yet done, looping");
+								if (exitLoop) break;
+							}
+						}
+						else GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(async () =>
+										await ReadBusinessCardThenSaveExport_Tesseract(preProcessedImage,
+																		  progressBar, loadingView,
+																				false));
+						if (preProcessedImage == null && allowCancelMicrosoftVisionOCRTask)
+						{
+							GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(() =>
+							{
+								UserDialogs.Instance.Alert("Image couldn't be read. Please try again",
+														   "Oops", "OK");
+							});
+							ShowDoneLoading(progressBar, loadingView);
+						}
+					}
+				}
+				*/
+			}
+			catch (AggregateException e)
+			{
+				Console.WriteLine("Exception messages:");
+				foreach (var ie in e.InnerExceptions)
+					Console.WriteLine("   {0}: {1}", ie.GetType().Name, ie.Message);
+			}
+			catch (Exception e){
+				Console.WriteLine("Exception: {0}", e.Message);
+			}
+			finally
+			{
+				cancelTokenSource.Dispose();
+				Console.WriteLine("\nTask status: {0}, Task cancelled? {1}", readTask.Status, 
+				                  readTask.IsCanceled);
+			}
+		}
+
+		public UIImage ScaleImage(UIImage image, float maxDimension = 960){
+			var scaledSize = new CGSize(maxDimension, maxDimension);
+			nfloat scaleFactor = 0;
+
+			if (image.Size.Width > image.Size.Height) {
+				scaleFactor = image.Size.Height / image.Size.Width;
+				scaledSize.Width = maxDimension;
+				scaledSize.Height = scaledSize.Width * scaleFactor;
+			 }
+			else {
+				scaleFactor = image.Size.Width / image.Size.Height;
+				scaledSize.Height = maxDimension;
+				scaledSize.Width = scaledSize.Height * scaleFactor;
+		  	}
+
+			UIGraphics.BeginImageContext(scaledSize); //UIGraphicsBeginImageContext(scaledSize)
+			image.Draw(new CGRect(0,0,scaledSize.Width, scaledSize.Height));//(CGRectMake(0, 0, scaledSize.width, scaledSize.height))
+			var scaledImage = UIGraphics.GetImageFromCurrentImageContext();//scaledImage = UIGraphicsGetImageFromCurrentImageContext()
+			UIGraphics.EndImageContext();// UIGraphicsEndImageContext()
+
+			Console.WriteLine("Scaled image to {0}, {1}", scaledImage.Size.Width, scaledImage.Size.Height);
+
+			return scaledImage;
 		}
 
 		public async Task ReadBusinessCardThenSaveExport_Tesseract(UIImage image, UIProgressView progressBar, 
-		                                                           UIActivityIndicatorView loadingView)
+		                                                           UIActivityIndicatorView loadingView, bool preProcessImage = true)
 		{
 			Console.WriteLine("in ReadBusinessCardThenSaveExport_Tesseract");
-
+			GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(
+				() => UserDialogs.Instance.Alert("It'll be fine! The data usage is less then sending a text chat", "Use a data connection for way better text reading",
+				                                 "Got it"));
+			//UIImage preProcessedImage = null;
+			ShowStartLoading(progressBar, loadingView);
 			if (image == null) throw new ArgumentNullException("Illegal null value passed to ImagePreprocessor" +
-															   ".ReadBusinessCardThenSaveExport(stream)");
+															   ".ReadBusinessCardThenSaveExport_Tesseract(...)");
 			ResetContactReaderData();
 			int progressCtr = 0;
 
-			ShowStartLoading(progressBar, loadingView);
-
 			//Preprocess image for better text recognition results - adds too much overhead time
-			Stream preProcessedStream = await PreprocessUIImage(image);
+			if(preProcessImage) image = await PreprocessUIImage(image, false, true);
 
 			//save for testing purposes
 			//SaveImageToPhotosApp(preProcessedStream, System.DateTime.Now.Second + "bwsharp.png");
 
-			var result = await ExtractTextFromImage_Tesseract(preProcessedStream);
+			var result = await ExtractResultFromImage_Tesseract(GetStreamFromUIImage(image));
 			var totalLines = (float)result.Count();
 			var textline = string.Empty;
 			var wholeTextForClipboard = string.Empty;
@@ -902,157 +978,191 @@ namespace PicTap
 			SaveAddressToContact();
 
 			ShowDoneLoading(progressBar, loadingView);
-			PostImageRecognitionActions.OpenIn(contact, wholeTextForClipboard);
+			GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(
+					() => PostImageRecognitionActions.OpenIn(contact, wholeTextForClipboard));
 		}
 
 		void ShowStartLoading(UIProgressView progressBar, UIActivityIndicatorView loadingView)
 		{
-			progressBar.Hidden = false;
-			loadingView.StartAnimating();
-			progressBar.SetProgress(0.25f, true);
+			GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(() => { 
+				progressBar.Hidden = false;
+				loadingView.StartAnimating();
+				progressBar.SetProgress(0.25f, true);
+			});
 		}
-			async void ShowDoneLoading(UIProgressView progressBar, UIActivityIndicatorView loadingView) { 
-			progressBar.SetProgress(1.0f, true);
-			await Task.Delay(1000);
-			progressBar.Hidden = true;
-			loadingView.StopAnimating();
-			progressBar.SetProgress(0.0f, false);
+		async void ShowDoneLoading(UIProgressView progressBar, UIActivityIndicatorView loadingView) {
+			GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(async () => { 
+				progressBar.SetProgress(1.0f, true);
+				await Task.Delay(1000);
+				progressBar.Hidden = true;
+				loadingView.StopAnimating();
+				progressBar.SetProgress(0.0f, false);
+			});
 		}
 
-		public async Task ReadBusinessCardThenSaveExport_MicrosoftVision(Stream image, UIProgressView progressBar, 
-		                                                 UIActivityIndicatorView loadingView)//CancellationToken cancelToken,
-	                                                     //bool canTimeout = false) 
+		public async void ReadBusinessCardThenSaveExport_MicrosoftVision(Stream image, UIProgressView progressBar, 
+		    UIActivityIndicatorView loadingView, CancellationToken cancelToken, bool canTimeout = false)
 		{
-			ShowStartLoading(progressBar, loadingView);
-			
-			if (image == null) throw new ArgumentNullException("Illegal null value passed to ImagePreprocessor" +
-		                                                       ".ReadBusinessCardThenSaveExport(stream)");
-			OcrResults result = null;
-			//contact = new CNMutableContact();
-			//postalAddress = new CNMutablePostalAddress();
-			ResetContactReaderData();
-			int progressCtr = 0;
-			string wholeTextForClipboard = "";
-
-			/*if (canTimeout){
-				Task.Run(async () =>
-				{
-					for (int i = 0; i < TIMEOUTLIMIT / 1000; i++)
-					{
-						await Task.Delay(1000);
-						Console.WriteLine("In Task Timer: {0}", i);// Cancel requested? {1}", i, cancelToken.IsCancellationRequested);
-						if (result == null) throw new TimeoutException("Image took too long to read");//cancelToken.ThrowIfCancellationRequested();
-						else Console.WriteLine("Text extracted from image");
-					}
-				});
-			}*/
-			result = await ExtractOCRResultFromImage_ProjectOxford(image);
-			progressBar.SetProgress(0.5f, true);
-
-			foreach (var region in result.Regions)
+			try
 			{
-				Console.WriteLine("In regions");
-				foreach (var line in region.Lines)
+				allowCancelMicrosoftVisionOCRTask = true;
+				ShowStartLoading(progressBar, loadingView);
+
+				if (image == null) throw new ArgumentNullException("Illegal null value passed to ImagePreprocessor" +
+																   ".ReadBusinessCardThenSaveExport(stream)");
+				OcrResults result = null;
+				ResetContactReaderData();
+				int progressCtr = 0;
+				string wholeTextForClipboard = "";
+
+				image = GetStreamFromUIImage(ScaleImage(GetUIImageFromStream(image)));
+
+				if (canTimeout)
 				{
-					Console.WriteLine("In lines");
-					wholeTextForClipboard += "\n" + CombineWordsIntoLine(line);
-					progressCtr++;
-					var readingProgress = progressBar.Progress + (float)(progressCtr / (float)region.Lines.Count());
-					progressBar.SetProgress(readingProgress, true);
-					goToNextIteration = false;//reset
-
-					//compare line to regex
-					Console.WriteLine("about to process textline: nameFound? {0}", nameFound);
-					if (!nameFound)
+					Task.Run(async () =>
 					{
-						nameFound = IsName(CombineWordsIntoLine(line));
-						if (nameFound)
+						try
 						{
-							goToNextIteration = true;
-							Console.WriteLine("Found name in text line, skipping to next line");
+							for (int i = 0; i < TIMEOUTLIMIT / 1000; i++)
+							{
+								await Task.Delay(1000);
+								cancelToken.ThrowIfCancellationRequested();
+								Console.WriteLine("in task Timing {1}... cancel? {0}",
+												  cancelToken.IsCancellationRequested,
+												 i);
+							}
 						}
-						else goToNextIteration = false;
-					}
-					Console.WriteLine("Done checking for name, gotonextiteration {0}", goToNextIteration);
-					if (goToNextIteration) continue;
-
-					Console.WriteLine("about to process textline for number: numFound? {0}", numFound);
-					numFound = IsNumber(CombineWordsIntoLine(line));
-					if (numFound)
-					{
-						goToNextIteration = true;
-						Console.WriteLine("Found number in text line, skipping to next line");
-					}
-					else goToNextIteration = false;
-					Console.WriteLine("Done checking for num, gotonextiteration {0}", goToNextIteration);
-					if (goToNextIteration) continue;
-
-					Console.WriteLine("about to process textline for org: orgFound? {0}", orgFound);
-					if (!orgFound)
-					{
-						orgFound = IsOrg(CombineWordsIntoLine(line));
-						if (orgFound)
+						catch (OperationCanceledException oe)
 						{
-							goToNextIteration = true;
-							Console.WriteLine("Found org in text line, skipping to next line");
+							Console.WriteLine("OperationCanceledException: {0}", oe.Message);
 						}
-						else goToNextIteration = false;
-					}
-					Console.WriteLine("Done checking for org, gotonextiteration {0}", goToNextIteration);
-					if (goToNextIteration) continue;
-
-					Console.WriteLine("about to process textline for EMAIL: emailFound? {0}", emailFound);
-					if (!emailFound)
-					{
-						emailFound = IsEmail(CombineWordsIntoLine(line));
-						if (emailFound)
-						{
-							goToNextIteration = true;
-							Console.WriteLine("Found email in text line, skipping to next line");
+						catch (Exception e){
+							Console.WriteLine("canTimeout Exception: {0}", e.Message);
 						}
-						else goToNextIteration = false;
-					}
-					Console.WriteLine("Done checking for email, gotonextiteration {0}", goToNextIteration);
-					if (goToNextIteration) continue;
-
-					Console.WriteLine("about to process textline for URL: URLFound? {0}", URLFound);
-					if (!URLFound)
-					{
-						URLFound = IsURL(CombineWordsIntoLine(line));
-						if (URLFound)
-						{
-							goToNextIteration = true;
-							Console.WriteLine("Found URL in text line, skipping to next line");
-						}
-						else goToNextIteration = false;
-					}
-					Console.WriteLine("Done checking for URL, gotonextiteration {0}", goToNextIteration);
-					if (goToNextIteration) continue;
-
-					CheckAddress(CombineWordsIntoLine(line));
-
-					Console.WriteLine("about to process textline: jobFound? {0}", jobFound);
-					if (!jobFound)
-					{
-						jobFound = IsJob(CombineWordsIntoLine(line));
-						if (jobFound)
-						{
-							goToNextIteration = true;
-							Console.WriteLine("Found job in text line, skipping to next line");
-						}
-						else goToNextIteration = false;
-					}
-					Console.WriteLine("Done checking for job, gotonextiteration {0}", goToNextIteration);
-					if (goToNextIteration) continue;
+					});
 				}
+
+				result = await ExtractOCRResultFromImage_ProjectOxford(image);
+				allowCancelMicrosoftVisionOCRTask = false;
+				Console.WriteLine("cancel Vision OCR? {0}", allowCancelMicrosoftVisionOCRTask);
+				GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(
+					() => progressBar.SetProgress(0.5f, true));
+
+				foreach (var region in result.Regions)
+				{
+					Console.WriteLine("In regions");
+					foreach (var line in region.Lines)
+					{
+						Console.WriteLine("In lines");
+						wholeTextForClipboard += "\n" + CombineWordsIntoLine(line);
+						progressCtr++;
+						GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(() =>
+						{
+							var readingProgress = progressBar.Progress + (float)(progressCtr / (float)region.Lines.Count());
+							progressBar.SetProgress(readingProgress, true);
+						});
+						goToNextIteration = false;//reset
+
+						//compare line to regex
+						//Console.WriteLine("about to process textline: nameFound? {0}", nameFound);
+						if (!nameFound)
+						{
+							nameFound = IsName(CombineWordsIntoLine(line));
+							if (nameFound)
+							{
+								goToNextIteration = true;
+								//Console.WriteLine("Found name in text line, skipping to next line");
+							}
+							else goToNextIteration = false;
+						}
+						//Console.WriteLine("Done checking for name, gotonextiteration {0}", goToNextIteration);
+						if (goToNextIteration) continue;
+
+						//Console.WriteLine("about to process textline for number: numFound? {0}", numFound);
+						numFound = IsNumber(CombineWordsIntoLine(line));
+						if (numFound)
+						{
+							goToNextIteration = true;
+							//Console.WriteLine("Found number in text line, skipping to next line");
+						}
+						else goToNextIteration = false;
+						//Console.WriteLine("Done checking for num, gotonextiteration {0}", goToNextIteration);
+						if (goToNextIteration) continue;
+
+						//Console.WriteLine("about to process textline for org: orgFound? {0}", orgFound);
+						if (!orgFound)
+						{
+							orgFound = IsOrg(CombineWordsIntoLine(line));
+							if (orgFound)
+							{
+								goToNextIteration = true;
+								//Console.WriteLine("Found org in text line, skipping to next line");
+							}
+							else goToNextIteration = false;
+						}
+						//Console.WriteLine("Done checking for org, gotonextiteration {0}", goToNextIteration);
+						if (goToNextIteration) continue;
+
+						//Console.WriteLine("about to process textline for EMAIL: emailFound? {0}", emailFound);
+						if (!emailFound)
+						{
+							emailFound = IsEmail(CombineWordsIntoLine(line));
+							if (emailFound)
+							{
+								goToNextIteration = true;
+								//Console.WriteLine("Found email in text line, skipping to next line");
+							}
+							else goToNextIteration = false;
+						}
+						//Console.WriteLine("Done checking for email, gotonextiteration {0}", goToNextIteration);
+						if (goToNextIteration) continue;
+
+						//Console.WriteLine("about to process textline for URL: URLFound? {0}", URLFound);
+						if (!URLFound)
+						{
+							URLFound = IsURL(CombineWordsIntoLine(line));
+							if (URLFound)
+							{
+								goToNextIteration = true;
+								//Console.WriteLine("Found URL in text line, skipping to next line");
+							}
+							else goToNextIteration = false;
+						}
+						//Console.WriteLine("Done checking for URL, gotonextiteration {0}", goToNextIteration);
+						if (goToNextIteration) continue;
+
+						CheckAddress(CombineWordsIntoLine(line));
+
+						//Console.WriteLine("about to process textline: jobFound? {0}", jobFound);
+						if (!jobFound)
+						{
+							jobFound = IsJob(CombineWordsIntoLine(line));
+							if (jobFound)
+							{
+								goToNextIteration = true;
+								//Console.WriteLine("Found job in text line, skipping to next line");
+							}
+							else goToNextIteration = false;
+						}
+						//Console.WriteLine("Done checking for job, gotonextiteration {0}", goToNextIteration);
+						if (goToNextIteration) continue;
+					}
+				}
+
+				//for some reason, only first call to SaveAddressToContact() actually saves to CNPostalAddress, 
+				//so call after loop for now
+				SaveAddressToContact();
+
+				ShowDoneLoading(progressBar, loadingView);
+				GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(
+					() => PostImageRecognitionActions.OpenIn(contact, wholeTextForClipboard));
+			}catch(AggregateException ae){
+				Console.WriteLine("ReadBusinessCardThenSaveExport_MicrosoftVision error: {0}",
+				                  ae.Message);
+			} catch (Exception ex){
+				Console.WriteLine("ReadBusinessCardThenSaveExport_MicrosoftVision(...) error: {0}", 
+				                  ex.Message);
 			}
-
-			//for some reason, only first call to SaveAddressToContact() actually saves to CNPostalAddress, 
-			//so call after loop for now
-			SaveAddressToContact();
-
-			ShowDoneLoading(progressBar, loadingView);
-			PostImageRecognitionActions.OpenIn(contact, wholeTextForClipboard);
 		}
 
 		bool IsOrg(string input) {
@@ -1071,9 +1181,14 @@ namespace PicTap
 			return false;
 		}
 
+
+
 		bool IsStreet(string input) {
 			//extract Street address
 			input = RemoveLabel(input);
+
+			if (HasStreetString(input)) return true;
+
 			var streetRegex = new Regex(RegexHelper.STREETREGEX);
 			var streetMatch = streetRegex.Match(input);
 
@@ -1120,7 +1235,7 @@ namespace PicTap
 				Console.WriteLine("Found single match city: {0}", postalAddress.City);
 				return true;
 			}
-			else Console.WriteLine("No single match city found");
+			//else Console.WriteLine("No single match city found");
 			return false;
 		}
 		bool IsPostalCode(string input)
@@ -1157,7 +1272,7 @@ namespace PicTap
 					return true;
 				}
 			}
-			else Console.WriteLine("IsCityAndPostal: No single match citypostal found");
+			//else Console.WriteLine("IsCityAndPostal: No single match citypostal found");
 			return false;
 
 			/*var citypostalRegex = new Regex(RegexHelper.CITYPOSTALREGEX);
@@ -1187,7 +1302,7 @@ namespace PicTap
 			//try {
 				var addresses = contact.PostalAddresses.ToList();
 				addresses.Add(new CNLabeledValue<CNPostalAddress>("work", (CNPostalAddress)postalAddress));
-				//contact.PostalAddresses = new CNLabeledValue<CNPostalAddress>[]{};
+				contact.PostalAddresses = new CNLabeledValue<CNPostalAddress>[]{};
 				contact.PostalAddresses = addresses.ToArray();
 
 				Console.WriteLine("postalAddress street and city: {0}, {1}", postalAddress.Street, postalAddress.City);
@@ -1348,6 +1463,19 @@ namespace PicTap
 			throw new NotImplementedException();
 		}
 
+		string CorrectWWWURLOCRError(string input) {
+			var wwwInputString = input;
+			if (!wwwInputString.Contains(RegexHelper.WWWDOTSTRING) &&
+				wwwInputString.Contains(RegexHelper.WWWSTRING))
+			{
+				Console.WriteLine("{0} contains www error", wwwInputString);
+				input = wwwInputString.Replace(RegexHelper.WWWSTRING, RegexHelper.WWWDOTSTRING);
+				Console.WriteLine("Fixed www error: {0}", input);
+			}
+			else Console.WriteLine("No www error found");
+			return input;
+		}
+
 		bool IsURL(string input) { 
 			//input = //RegexHelper.RemoveCountryCodeReadingErrorsAndSpecialChar(
 				//RegexHelper.RemoveCommonTesseractURLErrors(input);//);
@@ -1368,7 +1496,7 @@ namespace PicTap
 					//remove  label if any
 					if (labelMatch.Success)
 					{
-						Console.WriteLine("found email label: {0}", labelMatch.Groups[0].Value);
+						Console.WriteLine("found url label: {0}", labelMatch.Groups[0].Value);
 						try
 						{
 							var temp = urlLabeledMatchString.Replace(labelMatch.Groups[0].Value, string.Empty);
@@ -1380,6 +1508,9 @@ namespace PicTap
 						}
 						Console.WriteLine("Removed url label: {0}", urlLabeledMatchString);
 					}
+
+					//check for www. error (missing '.')
+					urlLabeledMatchString = CorrectWWWURLOCRError(urlLabeledMatchString);
 
 					var urls = contact.UrlAddresses.ToList();
 					urls.Add(new CNLabeledValue<NSString>("Website", (NSString)urlLabeledMatchString));
@@ -1451,12 +1582,9 @@ namespace PicTap
 
 			if (nameMatch.Success)
 			{
-				if (HasCompanySuffix(nameMatch.Groups[0].Value)) {
-					contact.OrganizationName += nameMatch.Groups[0].Value;
-					orgFound = true;//?
-					return false;
-				}
+				if (HasCompanySuffix(nameMatch.Groups[0].Value)) return false;
 				if (IsJob(nameMatch.Groups[0].Value)) return false;
+				if (HasStreetString(nameMatch.Groups[0].Value)) return false;
 
 				Console.WriteLine("name MATCH: " + nameMatch.Groups[0].Value);
 				names = nameMatch.Groups[0].Value.Split(new char[] { ' ', '\t' });
@@ -1486,6 +1614,25 @@ namespace PicTap
 			}
 			return false;
 		}
+
+		bool HasStreetString(string input)
+		{
+			var streets = RegexHelper.STREETLABELS.Split(new char[] { ' ', '\t' });
+			Console.WriteLine("{0} street title strings in memory", streets.Length);
+			for (int c = 0; c < streets.Length; c++)
+			{
+				Console.WriteLine("string {0} is {1}", c, streets[c]);
+				if (input.ToLower().Contains(streets[c].ToLower()))
+				{
+					Console.WriteLine("Found street match: {0}", streets[c]);
+					postalAddress.Street = input;
+					streetFound = true;
+					return true;
+				}
+			}
+			return false;
+		}
+
 		bool HasCompanySuffix(string input) { 
 			var companyStrings = RegexHelper.COMPANYSTRINGS.Split(new char[] { ' ', '\t' });
 			Console.WriteLine("{0} company strings in memory", companyStrings.Length);
@@ -1495,6 +1642,8 @@ namespace PicTap
 				if (input.ToLower().Contains(companyStrings[c].ToLower()))
 				{
 					Console.WriteLine("Found company match: {0}", companyStrings[c]);
+					contact.OrganizationName += input;
+					orgFound = true;
 					return true;
 				}
 			}
@@ -1556,7 +1705,7 @@ namespace PicTap
 					Console.WriteLine("extracted number is {0}", number);
 				}
 
-				//Console.WriteLine("Number match is {0}", numMatch.Groups[0].Value);
+				Console.WriteLine("Number match is {0}", numMatch.Groups[0].Value);
 				var numbers = contact.PhoneNumbers.ToList();
 				numbers.Add(new CNLabeledValue<CNPhoneNumber>("mobile",
 					  new CNPhoneNumber(number)));
@@ -1697,174 +1846,12 @@ namespace PicTap
 			}
 
 			PostImageRecognitionActions.OpenIn(contact);
-		}*/
+		}
 		void IfObjectNullExecuteAction(object match, Action recognitionAction) {
 			if (match == null) recognitionAction();
-		}
-		/*public async Task ReadImageTextThenSaveToPhoneContacts(Stream bwSharpenedStream, bool singledetect = true,
-			UIView View = null, bool secondattempt = false)
-		{
-			Console.WriteLine("In ReadImageTextThenSaveToDB");
-			//var progressBar = iOSUIBuilder.ShowCircularProgressBar(View, "Reading Image");
-			UserDialogs.Instance.ShowLoading("Reading Image", MaskType.Gradient);
-
-			string error = null;
-			string tempError = null;
-			string firstname, lastname, number, aff;
-			int errorStatus;
-			List<CNMutableContact> saveList = new List<CNMutableContact>();
-			Tesseract.Result result;
-			//CNMutableContact ContactToSave;
-
-			if (bwSharpenedStream == null)
-			{
-				throw new ArgumentNullException("ReadImageTextThenSaveToDB bwSharpenedStream param is null");
-			}
-
-			var imageResult = await ExtractTextFromImage(bwSharpenedStream);//imageList.ToArray();
-
-			if (imageResult == null)
-			{
-				UserDialogs.Instance.Alert("Unable to load contacts", "{0} couldn't read the image", "OK");
-			}
-			else {
-
-				for (int c = 0; c < (singledetect ? 1 : imageResult.Length);c++)//foreach (Tesseract.Result result in imageResult)
-				{
-					errorStatus = 0;
-					firstname = null;
-					lastname = null;
-					number = null;
-					aff = null;
-					result = imageResult[c];
-
-					try
-					{
-						var nameNumOrgNotesRegex = new Regex(Values.NAMENUMORGNOTESREGEX);
-						var nameNumRegex = new Regex(Values.NAMENUMREGEX);
-						var wordReg = new Regex(Values.WORDREGEX);
-						var numReg = new Regex(Values.NUMREGEX);
-						var strictNumReg = new Regex(Values.STRICTNUMREGEX);
-						var anyReg = new Regex(Values.ANYSTRINGREGEX);
-						var specialReg = new Regex(Values.SINGLESPECIALCHARREGEX);
-						var inBetweenNumRegex = new Regex(Values.INVALIDINBETWEENNUMREGEX);
-
-						Console.WriteLine("NEW LINE IN IMAGERESULT: " + result.Text);
-						Console.WriteLine("MINUS SPECIAL CHARS: " + RegexHelper.RemoveCountryCodeReadingErrorsAndSpecialChar(result.Text, new Regex(Values.COUNTRYCODE), specialReg));
-
-						Match nameNumOrgNotesMatch = nameNumOrgNotesRegex.Match(RegexHelper.RemoveCountryCodeReadingErrorsAndSpecialChar(result.Text, new Regex(Values.COUNTRYCODE), specialReg));
-						Match nameNumMatch = nameNumRegex.Match(RegexHelper.RemoveCountryCodeReadingErrorsAndSpecialChar(result.Text, new Regex(Values.COUNTRYCODE), specialReg));
-						Match wordMatch = wordReg.Match(RegexHelper.RemoveCountryCodeReadingErrorsAndSpecialChar(result.Text, new Regex(Values.COUNTRYCODE), specialReg));
-
-						if (nameNumOrgNotesMatch.Success )
-						{//check for different types of name and number combinations?
-							//progressBar.SetProgress(50, true);
-
-							Console.WriteLine("OVERALL COMBINED MATCH: " + nameNumMatch.Groups[0].Value);
-							Console.WriteLine("OVERALL NAME MATCH: " + wordMatch.Groups[0].Value);
-							tempError = wordMatch.Groups[0].Value + "\n";
-
-							//processing name
-							string[] words = wordMatch.Groups[0].Value.Split(new char[] { ' ', '\t' });
-							Console.WriteLine("words split by spaces count: " + words.Length);
-							if (words.Length - 1 > 1)
-							{
-								firstname = words[0];
-								for (int i = 1; i < words.Length; i++)
-								{
-									lastname += words[i];
-								}
-							}
-							else {
-								//usually happens in OCR misreads. add to error list for user to manually correct
-								lastname = words[0];
-								firstname = " ";
-								errorStatus = 1;
-							}
-							Console.WriteLine("firstname: " + firstname + "lastname: " + lastname + " Field missing:" + errorStatus);
-
-							//processing number
-							Match numMatch = numReg.Match(RegexHelper.RemoveMatchingString(
-								RegexHelper.subtractFromString(wordMatch.Groups[0].Value, nameNumMatch.Groups[0].Value), 
-								inBetweenNumRegex));//remove contact name from the name and number portion = number portion
-
-							Console.WriteLine("OVERALL NUMBER MATCH: " + numMatch.Groups[0].Value);
-
-							//remove spaces
-							string[] num = numMatch.Groups[0].Value.Split(new char[] { ' ', '\t' });
-							Console.WriteLine("number split by spaces count: " + num.Length);
-							if (num.Length > 1)
-							{
-								for (int i = 0; i < num.Length; i++)
-								{
-									number += num[i];
-								}
-							}
-							else {
-								number = numMatch.Groups[0].Value;
-							}
-							//progressBar.SetProgress(75, true);
-
-							//processing org and notes
-							Match orgNotesMatch = anyReg.Match(RegexHelper.subtractFromString(nameNumMatch.Groups[0].Value, nameNumOrgNotesMatch.Groups[0].Value));
-							Console.WriteLine("OVERALL ORG AND NOTES MATCH: " + orgNotesMatch.Groups[0].Value);
-
-							string[] orgNotes = orgNotesMatch.Groups[0].Value.Split(new char[] { ' ', '\t' });
-							Console.WriteLine("orgNotes split by spaces count: " + orgNotes.Length);
-							if (orgNotes.Length > 1)
-							{
-								for (int i = 0; i < orgNotes.Length; i++)
-								{
-									aff += orgNotes[i];
-								}
-							}
-							else {
-								aff = orgNotesMatch.Groups[0].Value;
-							}
-							Console.WriteLine("PROCESSING aff --------------------------- aff so far is " + aff);
-						}
-						else {
-							//single word and number - horizontally, vertically
-							Console.WriteLine ("PROBLEM IN WORD AND NUMBER MATCHING AFTER READING TEXTLINE FROM IMAGE");
-						}
-
-						Console.WriteLine(
-							"able to store contact - Name:" + firstname + " ,Last Name:" + lastname + ", Number:" + number);
-						var contact = new CNMutableContact { 
-							GivenName = firstname, 
-							FamilyName = lastname, 
-							PhoneNumbers = new CNLabeledValue<CNPhoneNumber>[]{
-								new CNLabeledValue<CNPhoneNumber>("mobile", new CNPhoneNumber(number))
-							},
-							OrganizationName = aff, 
-							};
-						saveList.Add(contact);
-					}
-					catch (ArgumentException ae)
-					{
-						Console.WriteLine(ae.Message + " - duplicatesAllowed?");
-					}
-					catch (Exception)
-					{
-
-						Console.WriteLine("ERROR SAVING CONTACT - SKIPPING: " + error);
-					}
-				}
-			}
-			UserDialogs.Instance.HideLoading();
-			//progressBar.SetProgress(100, true);
-			//progressBar.RemoveFromSuperview();
-
-			//refractor to save all contacts
-			var singlecontacttest = saveList.ElementAt(0);
-			ContactsHelper.PushNewContactDialogue(singlecontacttest.GivenName, singlecontacttest.FamilyName, 
-												  singlecontacttest.PhoneNumbers, singlecontacttest.OrganizationName);
-			
-
-			PostImageRecognitionActions.OpenIn(singlecontacttest);
 		}*/
 
-		public string SaveImageToDiskAndPhotosThenReturnPath(Stream s, string filename)
+		/*public string SaveImageToDiskAndPhotosThenReturnPath(Stream s, string filename)
 		{
 			//save to application folder
 			if (s != null && !string.IsNullOrWhiteSpace(filename))
@@ -1895,80 +1882,54 @@ namespace PicTap
 			}
 			Console.WriteLine("SaveImageToDiskThenNotifyViewModelToStartPreprocessingImage done");
 			return string.Empty;
-		}
+		}*/
 
-		public void SaveImageToPhotosApp(Stream s, string filename){
-			var someImage = GetUIImageFromStream(s);
+		public void SaveImageToPhotosApp(UIImage someImage, string filename){
 			try{
 				someImage.SaveToPhotosAlbum((image, error) => {
 					var o = image as UIImage;
-					//Console.WriteLine("error:" + error);
 				});
-				//Console.WriteLine("Saved Image to photos app");
 			}catch(Exception e){
 				Console.WriteLine ("error saving processed image: {0}", e.Message);
 			}
 		}
 
-		/*public async Task<Stream> PreprocessImage(Stream image, double GaussianSizeX, double GaussianSizeY){
-			Console.WriteLine("in PreprocessImage");
-
-			var origImage = GetUIImageFromStream(image);
-			Console.WriteLine("converted stream to UIImage");
-
-			var sharpenedImage = UnSharpMask (origImage);
-			Console.WriteLine("sharpened image");
-
-			//var croppedImageAsBytes = await Crop (sharpenedImage);
-			Console.WriteLine("cropped image");
-
-			return BytesToStream(croppedImageAsBytes);
-
-			//adaptivethreshold here
-
-		}*/
-
-
-
-		/*public async Task<Stream> PreprocessImage(string file, double GaussianSizeX, double GaussianSizeY){
-			Console.WriteLine("in PreprocessImage:file");
-			//UserDialogs.Instance.ShowLoading ("Cleaning Image...");
-
-			var origImage = GetUIImageFromStream(GetStreamFromFilename(file));
-			Console.WriteLine("converted stream to UIImage");
-
-			var sharpenedImage = UnSharpMask (origImage);
-			Console.WriteLine("sharpened image");
-
-			//UserDialogs.Instance.HideLoading();
-
-			return GetStreamFromUIImage(sharpenedImage);
-
-			//adaptivethreshold here
-
-		}*/
-
-		
-
-		public async Task<Stream> PreprocessUIImage(UIImage transformedcroppedimage)//, double GaussianSizeX, double GaussianSizeY)
+		public async Task<UIImage> PreprocessUIImage(UIImage transformedcroppedimage, 
+		                                             bool saveImage = false, bool useGPU = false)
 		{
 			Console.WriteLine("in PreprocessImage");
 
 			if (transformedcroppedimage != null) {
-				//UserDialogs.Instance.ShowLoading ("Cleaning Image...");
+				//var result = GetStreamFromUIImage(ApplyGreyScale(transformedcroppedimage));
+				var scaledImage = ScaleImage(transformedcroppedimage, 960);
+				StopWatchHelper.StartTimer();
+				var sharpenedImage = UnSharpMask(scaledImage, useGPU);
+				StopWatchHelper.StopTimer();
+				Console.WriteLine("unsharp timer done");
 
-				var sharpenedImage = UnSharpMask(transformedcroppedimage);
+				/*if (saveImage)
+				{
+					GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(
+						()=>SaveImageToPhotosApp(sharpenedImage, System.DateTime.Now.Second + "bwsharp.png"));
+				}*/
 
-				var adaptiveThreshImage = AdaptiveThreshold(sharpenedImage);//test
+				//StopWatchHelper.StartTimer();
+				var adaptiveThreshImage = AdaptiveThreshold(sharpenedImage);
+				//StopWatchHelper.StopTimer();
+				//Console.WriteLine("timer done");
 
 				UIImage finalImage = (adaptiveThreshImage == null) ? sharpenedImage : adaptiveThreshImage;
 
-				var result = GetStreamFromUIImage(finalImage);
+				if (saveImage)
+				{
+					GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(
+						() => SaveImageToPhotosApp(finalImage, System.DateTime.Now.Second + "bwsharp.png"));
+				}
 
-				//var result = GetStreamFromUIImage(ApplyGreyScale(transformedcroppedimage));
-				
-				return result;
+				Console.WriteLine("Done preprocessing");
+				return finalImage;
 			}
+			Console.WriteLine("Failed preprocessing");
 			return null;
 		}
 
@@ -1990,14 +1951,6 @@ namespace PicTap
 			return null;
 		}
 
-		public Task<byte[]> Transform(UIImage image){
-			var transformer = new CGAffineTransform ();
-			//image.CapInsets.
-			//CGAffineTransform.CGRectApplyAffineTransform (CGRect.FromLTRB(0,0,0,0), transformer);
-			return null;
-			
-		}
-
 		/*public Task<byte[]> Crop(UIImage image)
 		{
 			//var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -2015,33 +1968,47 @@ namespace PicTap
 			//return null;
 		}*/
 
-		UIImage UnSharpMask(UIImage origImage){
-
-			var imageToSharpen = CIImage.FromCGImage (origImage.CGImage);
-
-			// Create a CIUnsharpMask filter with the input image
-			var unsharp_mask = new CIUnsharpMask ()
+		UIImage UnSharpMask(UIImage origImage, bool useGPU = false){
+			if (useGPU)
 			{
-				Image = imageToSharpen, Radius = 7.0f
-			};
+				if (origImage != null)//around the same for Tesseract
+				{
+					var unsharpFilter = new GPUImageUnsharpMaskFilter()
+					{
+						BlurRadiusInPixels = (nfloat)6,
+						Intensity = (float)0.5
+					};
+					return unsharpFilter.CreateFilteredImage(origImage);
+				}
+			}
+			else { 
+				var imageToSharpen = CIImage.FromCGImage(origImage.CGImage);//better for Microsoft Vision
 
-			// Get the altered image from the filter
-			var output = unsharp_mask.OutputImage;
+				// Create a CIUnsharpMask filter with the input image
+				var unsharp_mask = new CIUnsharpMask()
+				{
+					Image = imageToSharpen,
+					Radius = 7.0f//, Intensity = 1.5f
+				};
+				// Get the altered image from the filter
+				var output = unsharp_mask.OutputImage;
 
-			// To render the results, we need to create a context, and then
-			// use one of the context rendering APIs, in this case, we render the
-			// result into a CoreGraphics image, which is merely a useful representation
-			//
-			var context = CIContext.FromOptions (null);
+				// To render the results, we need to create a context, and then
+				// use one of the context rendering APIs, in this case, we render the
+				// result into a CoreGraphics image, which is merely a useful representation
+				//
+				var context = CIContext.FromOptions(null);
 
-			var cgimage = context.CreateCGImage (output, output.Extent);
+				var cgimage = context.CreateCGImage(output, output.Extent);
 
-			return UIImage.FromImage (cgimage);
+				return UIImage.FromImage(cgimage);
+			}
+			return null;
 		}
 
 
 		public Stream GetStreamFromFilename(string file){
-			Console.WriteLine ("In GetStreamFromFilename");
+			//Console.WriteLine ("In GetStreamFromFilename");
 			return GetStreamFromUIImage (UIImage.FromFile (file));
 		}
 		public Stream GetStreamFromUIImage(UIImage image){

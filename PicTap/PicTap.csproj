@@ -149,6 +149,33 @@
     <Reference Include="Tesseract.iOS">
       <HintPath>..\packages\Xamarin.Tesseract.0.3.2\lib\Xamarin.iOS10\Tesseract.iOS.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Threading.Tasks">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\portable-net45+win8+wpa81\Microsoft.Threading.Tasks.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\portable-net45+win8+wpa81\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Primitives">
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.29\lib\Xamarin.iOS10\System.Net.Http.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Extensions">
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.29\lib\Xamarin.iOS10\System.Net.Http.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Apis.Core">
+      <HintPath>..\packages\Google.Apis.Core.1.15.0\lib\portable-net45+sl50+netcore45+wpa81+wp8\Google.Apis.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Zlib.Portable">
+      <HintPath>..\packages\Zlib.Portable.Signed.1.11.0\lib\portable-net4+sl5+wp8+win8+wpa81+MonoTouch+MonoAndroid\Zlib.Portable.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Apis">
+      <HintPath>..\packages\Google.Apis.1.15.0\lib\portable-net45+sl50+netcore45+wpa81+wp8\Google.Apis.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Apis.Auth">
+      <HintPath>..\packages\Google.Apis.Auth.1.15.0\lib\portable-net45+sl50+netcore45+wpa81+wp8\Google.Apis.Auth.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Apis.Vision.v1">
+      <HintPath>..\packages\Google.Apis.Vision.v1.1.15.0.572\lib\portable-net45+netcore45+wpa81+wp8\Google.Apis.Vision.v1.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\Contents.json" />
@@ -223,6 +250,7 @@
     <Compile Include="Helpers\NetworkStatusType.cs" />
     <Compile Include="Helpers\ClipBoardService.cs" />
     <Compile Include="Helpers\EmailService.cs" />
+    <Compile Include="Helpers\PingService.cs" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\capture_button%402x.png" />
@@ -264,6 +292,7 @@
     <BundleResource Include="Resources\tessdata\eng.cube.word-freq" />
     <BundleResource Include="Resources\tessdata\eng.tesseract_cube.nn" />
     <BundleResource Include="Resources\tessdata\eng.traineddata" />
+    <BundleResource Include="Resources\tessdata\osd.traineddata" />
   </ItemGroup>
   <ItemGroup>
     <XamarinComponentReference Include="googleiosmobileads">
@@ -292,4 +321,5 @@
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <Import Project="..\packages\Xamarin.Build.Download.0.2.1\build\Xamarin.Build.Download.targets" Condition="Exists('..\packages\Xamarin.Build.Download.0.2.1\build\Xamarin.Build.Download.targets')" />
   <Import Project="..\packages\Xamarin.Google.iOS.MobileAds.7.7.1.2\build\Xamarin.Google.iOS.MobileAds.targets" Condition="Exists('..\packages\Xamarin.Google.iOS.MobileAds.7.7.1.2\build\Xamarin.Google.iOS.MobileAds.targets')" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
 </Project>

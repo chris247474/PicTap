@@ -8,6 +8,7 @@ using Contacts;
 using System.Collections.Generic;
 using ContactsUI;
 using IPDFCamera_Binding;
+using System.Threading;
 
 namespace PicTap
 {
@@ -33,7 +34,7 @@ namespace PicTap
 
 		partial void TestButton_TouchUpInside(UIButton sender)
 		{
-			//ImageHelper.RunTest(9);
+			ImageHelper.RunTest(9);
 		}
 
 		public IPDFViewController() : base ("IPDFViewController", null)
@@ -56,7 +57,7 @@ namespace PicTap
 			base.ViewDidLoad();
 
 			GlobalVariables.VCToInvokeOnMainThread = this;
-			//UIApplication.SharedApplication.SetStatusBarHidden(true, true);
+			//(iOSNavigationHelper.GetUINavigationController() as UINavigationController).SetNavigationBarHidden(true, false);
 
 			weakSelf = new WeakReference(this);
 			if (weakSelf == null) Console.WriteLine("weakSelf is null"); else Console.WriteLine("not null");
@@ -107,12 +108,24 @@ namespace PicTap
 			var internetStatus = Reachability.InternetConnectionStatus();
 			if (internetStatus == NetworkStatusType.NotReachable){
 				Console.WriteLine("No internet connection available, using Tesseract");
-				await ImageHelper.ReadBusinessCardThenSaveExport_Tesseract(transformedcropped, ProgressBar, loadingView);
+
+				await ImageHelper.ReadBusinessCardThenSaveExport_Tesseract(transformedcropped, 
+				                                                           ProgressBar, loadingView);
 			}
 			else {
 				Console.WriteLine("Internet connection available, using Microsoft Vision");
-				await ImageHelper.ReadBusinessCardThenSaveExport_MicrosoftVision(ImageHelper.GetStreamFromUIImage(
-				transformedcropped), ProgressBar, loadingView);//, new CancellationToken(), true);
+
+				/*await ImageHelper.ReadBusinessCardThenSaveExport_Tesseract(
+					transformedcropped, ProgressBar, loadingView, true);*/
+				//Console.WriteLine("ping is {0}", PingService.GetPingRate("www.google.com"));
+
+				/*ImageHelper.ReadBusinessCardThenSaveExportHandleTimeout_MicrosoftVision(
+					transformedcropped,
+					ProgressBar, loadingView);*/ //fix task cancellation
+
+				ImageHelper.ReadBusinessCardThenSaveExport_MicrosoftVision(
+					ImageHelper.GetStreamFromUIImage(transformedcropped), ProgressBar, loadingView,
+					CancellationToken.None);
 			}
 
 			CaptureBtn.Enabled = true;
@@ -192,7 +205,7 @@ namespace PicTap
 		{
 			var filename = System.DateTime.Now.Second + "cropped.png";
 			Console.WriteLine("Saving Image, {0}", filename);
-			ImageHelper.SaveImageToPhotosApp/*SaveImageToDiskThenNotifyViewModelToStartPreprocessingImage*/(ImageHelper.GetStreamFromUIImage(captureImageView.Image),
+			ImageHelper.SaveImageToPhotosApp(captureImageView.Image,
 				filename);
 			Console.WriteLine("Done with IPDFCamera.SaveImage()");
 		}

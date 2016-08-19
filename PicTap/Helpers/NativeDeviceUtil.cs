@@ -18,7 +18,7 @@ namespace PicTap
 			contacts = abb.GetPeople ();
 		}
 
-		public static async Task Share (string message)
+		public static async void Share (string message)
 		{
 			var messagecontent = message;
 			var msg = UIActivity.FromObject (messagecontent);

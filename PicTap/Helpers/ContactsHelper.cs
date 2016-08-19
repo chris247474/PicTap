@@ -40,7 +40,16 @@ namespace PicTap
 					editor.Delegate = new CNViewControllerDelegate();
 					Console.WriteLine("done configuring CNContactViewController, requestGranted:{0}", granted);
 
-					if (granted) PushCNContactViewControllerWithToolBarItemsOutsideUINavigationController(editor, Values.APPNAME);
+						if (granted)
+						{
+							/*GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(() =>
+							{
+								var navControl = (iOSNavigationHelper.GetUINavigationController() as UINavigationController);
+								navControl.SetNavigationBarHidden(false, true);
+								navControl.PushViewController(editor, true);
+							});*/
+							PushCNContactViewControllerWithToolBarItemsOutsideUINavigationController(editor, Values.APPNAME);
+						}
 					else UserDialogs.Instance.Alert("Go to Settings so we can save business cards to your contacts",
 					                                string.Format("{0} needs permission to save contacts", Values.APPNAME), 
 					                                "OK");

@@ -7,8 +7,8 @@ namespace PicTap
 	{
 		//public const string EMAILREGEXV2 = 
 		//	"^([\\w-\\.]+@(?!gmail.com)(?!yahoo.com)(?!hotmail.com)([\\w- ]+\\.)+[\\w-]{2,4})?$";
-		public const string LABELEDEMAILREGEX = 
-			"(\\s*[A-Z]*[a-z]*:\\s*)*\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
+		public const string LABELEDEMAILREGEX =
+			"(\\s*[A-Z]*[a-z]*.*:\\s*)*\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";//"(\s*[A-Z]*[a-z]*:\s*)*\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*";
 		public const string EMAILREGEX = "\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
 		public const string ALLNUMBERSREGEX = "((\\()*(\\))*(\\d+)*(\\s)*(-)*(\\d+)*(-)*)*";
 		public const string SINGLENUMREGEX = "((\\+)*(\\()*(\\))*(\\d+)*(\\s)*(-)*(\\d+)*(-)*)*";
@@ -25,7 +25,7 @@ namespace PicTap
 		public const string ORGREGEX = //"([\\p{L}'-]+)";
 			//need to improve differentiation between org and name - for now, 
 			//org only recognizes text followed by substrings of const COMPANYSTRINGS
-			@"(\w+\s*((Corp)|(Org)|(Company)|(Inc)))|([A-Z]{3})";//|([\\p{L}'-]+)";
+			"(\\w+\\s*((Corp)|(Org)|(Company)|(Inc)))|([A-Z]{3})";//|([\\p{L}'-]+)";
 		public const string ADDRESSREGEX = 
 			LABELREGEX+
 			"(\\d{1,3}.?\\d{0,3}\\s[a-zA-Z]{2,30}(\\s[a-zA-Z]{2,15})?([#\\.0-9a-zA-Z]*)?(\\,*\\s\\w*\\,)*(\\s)*(City)*(\\s)*(\\d{4,7})*)";
@@ -35,8 +35,9 @@ namespace PicTap
 		public const string COUNTRYREGEX = "";
 		public const string POSTALREGEX = "\\d{4,7}";
 		public const string CITYPOSTALREGEX = "(\\d{4,7}\\sCity)*(City\\s\\d{4,7})*";
-		public const string WWW_LIMITEDURLREGEX = 
-			"((www\\.|(http|https|ftp|news|file)+\\:\\/\\/)[_.a-z0-9-]+\\.[a-z0-9\\/_:@=.+?,##%&~-]*[^.|\\'|\\# |!|\\(|?|,| |>|<|;|\\)])";
+		public const string WWW_LIMITEDURLREGEX =
+			"((www|(http|https|ftp|news|file)+\\:\\/\\/)*[_.a-z0-9-]+\\.[a-z0-9\\/_:@=.+?,##%&~-]*[^.|\\'|\\# |!|\\(|?|,| |>|<|;|\\)])";
+			//"((www\\.|(http|https|ftp|news|file)+\\:\\/\\/)[_.a-z0-9-]+\\.[a-z0-9\\/_:@=.+?,##%&~-]*[^.|\\'|\\# |!|\\(|?|,| |>|<|;|\\)])";
 		//public const string COM_LIMITEDREGEX = "(http(s)?:)?([\\w-]+\\.)+[\\w-]+[.com]+([?%&=]*)?";
 		public const string COPYRIGHTCHAR = "©";
 		public const string COMSTRING = "com";
@@ -50,13 +51,16 @@ namespace PicTap
 		public const string COMMA = ",";
 		public const string DOT = ".";
 		public const string DASH = "-";
+		public const string WWWSTRING = "www";
+		public const string WWWDOTSTRING = "www.";
 		public const string COMPANYSTRINGS = 
 			"COMPANY CORP ORG INC INDUSTRIES TELECOM BANK PHILIPPINES LAND TECHNOLOGY CONSULTANCY ELECTRON FOOD COMPUTERS" +
 			"EXPRESS DELIVERY BOOKS GROUP BUSINESS PREMIER GYM BOXING OFFICE";
 		public const string JOBTITLES = "manager associate president assistant secretary operations ceo coo cto cpa" +
 			"lawyer consultant director marketing specialist trainee trainer teacher professor doctor Dr. broker attorney designer" +
-			"planner executive";
+			"planner executive prc";
 		public const string CITYLABELS = "city";
+		public const string STREETLABELS = "st st. ave avenue road loop alley";
 
 
 		public static string subtractFromString(string stringToRemove, string originalString)

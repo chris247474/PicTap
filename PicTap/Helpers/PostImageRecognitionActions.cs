@@ -25,7 +25,7 @@ namespace PicTap
 
 			if (string.Equals(result, openin))
 			{
-				await NativeDeviceUtil.Share(CombineContactDataForExporting(contact));
+				NativeDeviceUtil.Share(CombineContactDataForExporting(contact));
 			}
 			else if (string.Equals(result, saveto))
 			{

@@ -52,7 +52,7 @@
                                     <rect key="frame" x="283" y="212" width="46" height="30"/>
                                 </variation>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="725" translatesAutoresizingMaskIntoConstraints="NO" alpha="0">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="725" translatesAutoresizingMaskIntoConstraints="NO">
                                 <rect key="frame" x="294" y="69" width="46" height="30"/>
                                 <state key="normal" title="Start Test">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -84,7 +84,7 @@
                             <progressView opaque="NO" contentMode="scaleToFill" progress="0" translatesAutoresizingMaskIntoConstraints="NO" id="732" progressViewStyle="bar">
                                 <rect key="frame" x="0.0" y="665" width="150" height="9"/>
                                 <variation key="heightClass=regular-widthClass=compact">
-                                    <rect key="frame" x="0.0" y="0.0" width="374" height="4"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="374" height="6"/>
                                     <mask key="constraints">
                                         <include reference="849"/>
                                         <include reference="896"/>
@@ -94,7 +94,7 @@
                                 <constraints>
                                     <constraint id="849" firstAttribute="width" constant="374"/>
                                     <constraint id="896" firstItem="732" firstAttribute="height" constant="10">
-                                        <variation key="heightClass=regular-widthClass=compact" constant="3"/>
+                                        <variation key="heightClass=regular-widthClass=compact" constant="5"/>
                                     </constraint>
                                 </constraints>
                                 <variation key="default">

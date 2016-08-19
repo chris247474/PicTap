@@ -28,7 +28,7 @@ namespace PicTap
 		CNMutablePostalAddress postalAddress;
 		bool nameFound = false, numFound = false, emailFound = false, URLFound = false, //addressFound = false,
 				orgFound = false, goToNextIteration = false, streetFound = false, citypostalFound = false,
-				cityFound = false, jobFound = false, allowCancelMicrosoftVisionOCRTask = false;
+				cityFound = false, jobFound = false;//, allowCancelMicrosoftVisionOCRTask = false;
 
 		public ImagePreProcessor()
 		{
@@ -692,25 +692,107 @@ namespace PicTap
 			}
 			return text;
 		}
+		/*
+			var cancelTokenSource = new CancellationTokenSource();
+					var cancelToken = cancelTokenSource.Token;
 
-		public async Task<OcrResults> ExtractOCRResultFromImage_ProjectOxford(Stream image)
+					Task readTask = null;
+					Task.Run(() => { 
+						readTask = Task.Factory.StartNew(async () =>
+						{
+							try
+							{
+								result = client.RecognizeTextAsync(image, "en").Result;
+								for (int i = 0; i < TIMEOUTLIMIT / 1000; i++)
+								{
+									await Task.Delay(1000);
+									cancelToken.ThrowIfCancellationRequested();
+									Console.WriteLine("in task Timing {1}... cancel? {0}",
+													  cancelToken.IsCancellationRequested,
+													 i);
+								}
+
+							}
+							catch (OperationCanceledException oe)
+							{
+								Console.WriteLine("OperationCanceledException: {0}", oe.Message);
+								GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(
+									() => UserDialogs.Instance.Alert("Something went wrong. Please try again",
+																 "Oops", "OK"));
+							}
+							finally
+							{
+								Console.WriteLine("result fetched value? {0}",
+												  (result.Regions.Count() > 0));
+							}
+
+						}, cancelToken);
+					});
+					while (readTask.Status != TaskStatus.Running)
+					{
+						//Wait until task is running
+						Console.WriteLine("Not yet running");
+					}
+
+					var timeout = TIMEOUTLIMIT / 1000;
+					for (int c = 0; c < timeout; c++)
+					{
+						await Task.Delay(1000);
+						Console.WriteLine("cancel in: {0}", timeout - c);
+					}
+
+					cancelTokenSource.Cancel();
+					Console.WriteLine("cancelTokenSource.Cancel(): {0}, cancelToken: {1}, Task status: {2}",
+									  cancelTokenSource.IsCancellationRequested,
+									  cancelToken.IsCancellationRequested,
+									  readTask.Status);
+		*/
+		public async Task<OcrResults> ExtractOCRResultFromImage_ProjectOxford(Stream image, 
+		                                                                      bool canTimeout = false)
 		{
 			Console.WriteLine("In ExtractTextFromImage_ProjectOxford");
-			try { 
-				OcrResults result = new OcrResults();
+			OcrResults result = null;
+
+			try
+			{
 				var client = new VisionServiceClient("53ffa1a4499e42caa902805119e297e2");
 
-				result = await client.RecognizeTextAsync(image, "en");
-				Console.WriteLine("language : {0}", result.Language);
+				if (canTimeout)//doesn't work
+				{
+					Task.Run(async () =>
+					{
+						await Task.Delay(TimeSpan.FromMilliseconds(TIMEOUTLIMIT));
+						Console.WriteLine("Done counting down");
+						if (result == null)
+						{
+							throw new Exception("timeout");
+							Console.WriteLine("Call null timeout here");
+						}
+						else if (!(result.Regions.Count() > 0))
+						{
+							//throw new TimeoutException("timeout");
+							Console.WriteLine("Call no text region timeout here");
+						}
+						else Console.WriteLine("No timeout condition satisfied");
+					});
+				}
 
-				return result;
-			} catch (Exception e) {
+				await Task.Delay(5000);
+				result = await client.RecognizeTextAsync(image, "en");
+			}
+			catch (AggregateException ae) {
+				Console.WriteLine("Timed out");
+				GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(
+									() => UserDialogs.Instance.Alert("Something went wrong. Please try again",
+																 "Oops", "OK"));
+			}
+			catch (Exception e) {
 				Console.WriteLine("Microsoft OCR error: {0}", e.InnerException.Message);
 			}
-			return null;
+			return result;
 		}
 
-		public async void ReadBusinessCardThenSaveExportHandleTimeout_MicrosoftVision(UIImage image, UIProgressView progressBar,
+		public async Task ReadBusinessCardThenSaveExportHandleTimeout_MicrosoftVision(UIImage image, UIProgressView progressBar,
 			UIActivityIndicatorView loadingView)
 		{
 			UIImage preProcessedImage = null;
@@ -719,40 +801,7 @@ namespace PicTap
 				preProcessedImage = await PreprocessUIImage(image, false);//check sharpening quality
 			});*/
 
-			var cancelTokenSource = new CancellationTokenSource();
-			var cancelToken = cancelTokenSource.Token;
 
-			var readTask = Task.Factory.StartNew(() => {
-				//ReadBusinessCardThenSaveExport_MicrosoftVision(
-				//	GetStreamFromUIImage(image), progressBar, loadingView, cancelToken, true);
-
-				Task.Run(() => { 
-					for (int c = 0; !cancelToken.IsCancellationRequested; c++)
-					{
-						Console.WriteLine("do something do something do something");
-						cancelToken.ThrowIfCancellationRequested();
-						Console.WriteLine("CancelToken cancelled: {0}",
-										  cancelToken.IsCancellationRequested);
-					}
-				}, cancelToken);
-			}, cancelToken);
-			//readTask.Start();
-			while (readTask.Status != TaskStatus.Running)
-			{
-				//Wait until task is running
-				Console.WriteLine("Not yet running");
-			}
-
-			try
-			{
-				for (int c = 0; c < 6; c++) {
-					await Task.Delay(1000);
-					Console.WriteLine("cancel countdown: {0}", c);
-				}
-				cancelTokenSource.Cancel();
-				Console.WriteLine("cancelTokenSource.Cancel(): {0}, cancelToken: {1}", 
-				                  cancelTokenSource.IsCancellationRequested, 
-				                  cancelToken.IsCancellationRequested);
 				/*for (int i = 0; i < TIMEOUTLIMIT / 1000; i++)
 				{
 					await Task.Delay(1000);
@@ -810,22 +859,7 @@ namespace PicTap
 					}
 				}
 				*/
-			}
-			catch (AggregateException e)
-			{
-				Console.WriteLine("Exception messages:");
-				foreach (var ie in e.InnerExceptions)
-					Console.WriteLine("   {0}: {1}", ie.GetType().Name, ie.Message);
-			}
-			catch (Exception e){
-				Console.WriteLine("Exception: {0}", e.Message);
-			}
-			finally
-			{
-				cancelTokenSource.Dispose();
-				Console.WriteLine("\nTask status: {0}, Task cancelled? {1}", readTask.Status, 
-				                  readTask.IsCanceled);
-			}
+			
 		}
 
 		public UIImage ScaleImage(UIImage image, float maxDimension = 960){
@@ -884,8 +918,8 @@ namespace PicTap
 				wholeTextForClipboard += "\n" + line.Text;
 				textline = line.Text;
 				progressCtr++;
-				var readingProgress = progressBar.Progress + (float)(progressCtr / totalLines);
-				progressBar.SetProgress(readingProgress, true);
+				//var readingProgress = progressBar.Progress + (float)(progressCtr / totalLines);
+				//progressBar.SetProgress(readingProgress, true);
 				goToNextIteration = false;//reset
 
 				//compare line to regex
@@ -984,10 +1018,16 @@ namespace PicTap
 
 		void ShowStartLoading(UIProgressView progressBar, UIActivityIndicatorView loadingView)
 		{
-			GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(() => { 
+			GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(async () => { 
 				progressBar.Hidden = false;
 				loadingView.StartAnimating();
-				progressBar.SetProgress(0.25f, true);
+
+				var timeout = (TIMEOUTLIMIT / 1000)*100;
+				await Task.Delay(1000);
+				for (int c = 0; c < timeout; c++) {
+					await Task.Delay(10);
+					progressBar.SetProgress((float)((float)c/timeout), true);
+				}
 			});
 		}
 		async void ShowDoneLoading(UIProgressView progressBar, UIActivityIndicatorView loadingView) {
@@ -1000,12 +1040,12 @@ namespace PicTap
 			});
 		}
 
-		public async void ReadBusinessCardThenSaveExport_MicrosoftVision(Stream image, UIProgressView progressBar, 
-		    UIActivityIndicatorView loadingView, CancellationToken cancelToken, bool canTimeout = false)
+		public async Task ReadBusinessCardThenSaveExport_MicrosoftVision(Stream image, 
+		    UIProgressView progressBar, 
+		    UIActivityIndicatorView loadingView, bool canTimeout = false)
 		{
 			try
 			{
-				allowCancelMicrosoftVisionOCRTask = true;
 				ShowStartLoading(progressBar, loadingView);
 
 				if (image == null) throw new ArgumentNullException("Illegal null value passed to ImagePreprocessor" +
@@ -1017,36 +1057,9 @@ namespace PicTap
 
 				image = GetStreamFromUIImage(ScaleImage(GetUIImageFromStream(image)));
 
-				if (canTimeout)
-				{
-					Task.Run(async () =>
-					{
-						try
-						{
-							for (int i = 0; i < TIMEOUTLIMIT / 1000; i++)
-							{
-								await Task.Delay(1000);
-								cancelToken.ThrowIfCancellationRequested();
-								Console.WriteLine("in task Timing {1}... cancel? {0}",
-												  cancelToken.IsCancellationRequested,
-												 i);
-							}
-						}
-						catch (OperationCanceledException oe)
-						{
-							Console.WriteLine("OperationCanceledException: {0}", oe.Message);
-						}
-						catch (Exception e){
-							Console.WriteLine("canTimeout Exception: {0}", e.Message);
-						}
-					});
-				}
-
 				result = await ExtractOCRResultFromImage_ProjectOxford(image);
-				allowCancelMicrosoftVisionOCRTask = false;
-				Console.WriteLine("cancel Vision OCR? {0}", allowCancelMicrosoftVisionOCRTask);
-				GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(
-					() => progressBar.SetProgress(0.5f, true));
+				//GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(
+				//	() => progressBar.SetProgress(0.5f, true));
 
 				foreach (var region in result.Regions)
 				{
@@ -1056,11 +1069,11 @@ namespace PicTap
 						Console.WriteLine("In lines");
 						wholeTextForClipboard += "\n" + CombineWordsIntoLine(line);
 						progressCtr++;
-						GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(() =>
+						/*GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(() =>
 						{
 							var readingProgress = progressBar.Progress + (float)(progressCtr / (float)region.Lines.Count());
 							progressBar.SetProgress(readingProgress, true);
-						});
+						});*/
 						goToNextIteration = false;//reset
 
 						//compare line to regex
@@ -1159,9 +1172,11 @@ namespace PicTap
 			}catch(AggregateException ae){
 				Console.WriteLine("ReadBusinessCardThenSaveExport_MicrosoftVision error: {0}",
 				                  ae.Message);
+				ShowDoneLoading(progressBar, loadingView);
 			} catch (Exception ex){
 				Console.WriteLine("ReadBusinessCardThenSaveExport_MicrosoftVision(...) error: {0}", 
 				                  ex.Message);
+				ShowDoneLoading(progressBar, loadingView);
 			}
 		}
 

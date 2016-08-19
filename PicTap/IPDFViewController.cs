@@ -119,13 +119,12 @@ namespace PicTap
 					transformedcropped, ProgressBar, loadingView, true);*/
 				//Console.WriteLine("ping is {0}", PingService.GetPingRate("www.google.com"));
 
-				/*ImageHelper.ReadBusinessCardThenSaveExportHandleTimeout_MicrosoftVision(
+				/*await ImageHelper.ReadBusinessCardThenSaveExportHandleTimeout_MicrosoftVision(
 					transformedcropped,
 					ProgressBar, loadingView);*/ //fix task cancellation
 
-				ImageHelper.ReadBusinessCardThenSaveExport_MicrosoftVision(
-					ImageHelper.GetStreamFromUIImage(transformedcropped), ProgressBar, loadingView,
-					CancellationToken.None);
+				await ImageHelper.ReadBusinessCardThenSaveExport_MicrosoftVision(
+					ImageHelper.GetStreamFromUIImage(transformedcropped), ProgressBar, loadingView, true);
 			}
 
 			CaptureBtn.Enabled = true;

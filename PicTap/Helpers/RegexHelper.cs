@@ -5,8 +5,6 @@ namespace PicTap
 {
 	public static class RegexHelper
 	{
-		//public const string EMAILREGEXV2 = 
-		//	"^([\\w-\\.]+@(?!gmail.com)(?!yahoo.com)(?!hotmail.com)([\\w- ]+\\.)+[\\w-]{2,4})?$";
 		public const string LABELEDEMAILREGEX =
 			"(\\s*[A-Z]*[a-z]*.*:\\s*)*\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";//"(\s*[A-Z]*[a-z]*:\s*)*\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*";
 		public const string EMAILREGEX = "\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
@@ -26,9 +24,10 @@ namespace PicTap
 			//need to improve differentiation between org and name - for now, 
 			//org only recognizes text followed by substrings of const COMPANYSTRINGS
 			"(\\w+\\s*((Corp)|(Org)|(Company)|(Inc)))|([A-Z]{3})";//|([\\p{L}'-]+)";
-		public const string ADDRESSREGEX = 
-			LABELREGEX+
-			"(\\d{1,3}.?\\d{0,3}\\s[a-zA-Z]{2,30}(\\s[a-zA-Z]{2,15})?([#\\.0-9a-zA-Z]*)?(\\,*\\s\\w*\\,)*(\\s)*(City)*(\\s)*(\\d{4,7})*)";
+		public const string ADDRESSREGEX =
+			LABELREGEX +
+			"\\d{1,3}.?\\d{0,3}\\s[a-zA-Z]{2,30}(\\s[a-zA-Z]{2,15})?([#\\.0-9a-zA-Z]*)?(\\,*\\s\\w*\\,*)*(\\s)*(City)*(\\s)*(\\d{4,7})*";
+			//"(\\d{1,3}.?\\d{0,3}\\s[a-zA-Z]{2,30}(\\s[a-zA-Z]{2,15})?([#\\.0-9a-zA-Z]*)?(\\,*\\s\\w*\\,)*(\\s)*(City)*(\\s)*(\\d{4,7})*)";
 		//"(([A-Z]*[a-z]*)(\\s*)*)*";
 		public const string STREETREGEX = "\\d{1,3}.?\\d{0,3}\\s[a-zA-Z]{2,30}(\\s[a-zA-Z]{2,15})?([#\\.0-9a-zA-Z]*)?";
 		public const string CITYREGEX = "([A-z]*\\s*[a-z]*)*\\sCity";
@@ -54,11 +53,11 @@ namespace PicTap
 		public const string WWWSTRING = "www";
 		public const string WWWDOTSTRING = "www.";
 		public const string COMPANYSTRINGS = 
-			"COMPANY CORP ORG INC INDUSTRIES TELECOM BANK PHILIPPINES LAND TECHNOLOGY CONSULTANCY ELECTRON FOOD COMPUTERS" +
-			"EXPRESS DELIVERY BOOKS GROUP BUSINESS PREMIER GYM BOXING OFFICE";
+			"COMPANY CORP ORG INC INDUSTRIES TELECOM BANK PHILIPPINES LAND TECHNOLOGY CONSULTAN ELECTRON FOOD COMPUTERS" +
+			"EXPRESS DELIVERY BOOKS GROUP BUSINESS PREMIER GYM BOXING OFFICE DEVELOPMENT ENERGY";
 		public const string JOBTITLES = "manager associate president assistant secretary operations ceo coo cto cpa" +
 			"lawyer consultant director marketing specialist trainee trainer teacher professor doctor Dr. broker attorney designer" +
-			"planner executive prc";
+			"planner executive prc architect deputy senior junior managing";
 		public const string CITYLABELS = "city";
 		public const string STREETLABELS = "st st. ave avenue road loop alley";
 

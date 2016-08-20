@@ -98,12 +98,16 @@ namespace PicTap
 			}
 		}
 
+		void EnableDisableUI() { 
+			CaptureBtn.Enabled = !CaptureBtn.Enabled;
+			ChoosePhotoButton.Enabled = !ChoosePhotoButton.Enabled;
+			FlashButton.Enabled = !FlashButton.Enabled;
+		}
+
 		public async void loadContactsFromPic(UIImage transformedcropped, bool saveProcessedImage)
 		{
 			Console.WriteLine("In loadContactsFromPic");
-			CaptureBtn.Enabled = false;
-			ChoosePhotoButton.Enabled = false;
-			FlashButton.Enabled = false;
+			EnableDisableUI();
 
 			var internetStatus = Reachability.InternetConnectionStatus();
 			if (internetStatus == NetworkStatusType.NotReachable){
@@ -127,9 +131,10 @@ namespace PicTap
 					ImageHelper.GetStreamFromUIImage(transformedcropped), ProgressBar, loadingView, true);
 			}
 
-			CaptureBtn.Enabled = true;
+			EnableDisableUI();
+			/*CaptureBtn.Enabled = true;
 			ChoosePhotoButton.Enabled = true;
-			FlashButton.Enabled = true;
+			FlashButton.Enabled = true;*/
 			Console.WriteLine("loadContactsFromPic Done");
 		}
 

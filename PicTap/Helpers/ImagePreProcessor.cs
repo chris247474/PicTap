@@ -1331,151 +1331,58 @@ namespace PicTap
 			if (streetFound || cityFound) Console.WriteLine("Found address: {0},{1}",
 															postalAddress.Street, postalAddress.City);
 		}
+		string RemovePeriodsInAddress(string input) {
+			return input.Replace(".", "");
+		}
 
 		void CheckAddress(string input)
 		{
 			Console.WriteLine("Address: input filtered errors and special chars:{0}", input);
 
+			var possibleAddress = RemovePeriodsInAddress(input);
 			var addressRegex = new Regex(RegexHelper.ADDRESSREGEX);
-			//var addressMatch = addressRegex.Match(input);
-			//string addressWithoutLabel = input;
-
-			Console.WriteLine("streetFound? {0}", streetFound);
-			if (!streetFound)
+			var addressMatch = addressRegex.Match(possibleAddress);
+			if (addressMatch.Success)
 			{
-				streetFound = IsStreet(input);
-				if (streetFound)
-				{
-					Console.WriteLine("Found street, skipping to next line");
-					return;
-				}
-				else Console.WriteLine("No street found");
+				Console.WriteLine("Address found: {0}", addressMatch.Groups[0].Value);
+				postalAddress.Street = addressMatch.Groups[0].Value;
+				streetFound = true;
 			}
-			Console.WriteLine("cityFound? {0}", cityFound);
-			if (!cityFound)
-			{
-				cityFound = IsCity(input);
-				if (cityFound) { 
-					Console.WriteLine("Found city, skipping to next line");
-					return;
-				}else Console.WriteLine("No city found");
-			}
-			Console.WriteLine("citypostalFound? {0}", citypostalFound);
-			if (!citypostalFound)
-			{
-				citypostalFound = IsCityAndPostal(input);
-				if (citypostalFound)
+			else { 
+				Console.WriteLine("streetFound? {0}", streetFound);
+				if (!streetFound)
 				{
-					Console.WriteLine("Found citypostal, skipping to next line");
-					return;
-				}
-				else Console.WriteLine("No citypostal found");
-			}
-
-			/*if (addressMatch.Success)
-			{
-				Console.WriteLine("Found an address: {0}", addressMatch.Groups[0].Value);
-
-				addressWithoutLabel = RemoveLabel(input);
-
-				//extract Street address
-				var streetRegex = new Regex(RegexHelper.STREETREGEX);
-				var streetMatch = streetRegex.Match(addressWithoutLabel);
-				if (streetMatch.Success){
-					var street = streetMatch.Groups[0].Value;
-					postalAddress.Street = street;
-					addressWithoutLabel = addressWithoutLabel.Replace(street, string.Empty);
-					Console.WriteLine("Found street: {0}, remaining string: {1}", street, addressWithoutLabel);
-				} else Console.WriteLine("No street found, remaining string: {0}", addressWithoutLabel);*/
-
-			/*var citypostalRegex = new Regex(RegexHelper.CITYPOSTALREGEX);
-			var citypostalMatch = citypostalRegex.Match(addressWithoutLabel);
-			if (citypostalMatch.Success)
-			{
-				Console.WriteLine("Found citypostal match: {0}", citypostalMatch.Groups[0].Value);
-				var postalRegex = new Regex(RegexHelper.POSTALREGEX);
-				var postalMatch = postalRegex.Match(addressWithoutLabel);
-				var cityRegex = new Regex(RegexHelper.CITYREGEX);
-				var cityMatch = cityRegex.Match(addressWithoutLabel);
-
-				if (postalMatch.Success)
-				{
-					var postal = postalMatch.Groups[0].Value;
-					postalAddress.PostalCode = postal;
-					addressWithoutLabel = addressWithoutLabel.Replace(postal, string.Empty);
-					Console.WriteLine("Found postal: {0}, remaining string: {1}", postal, addressWithoutLabel);
-
-					if (cityMatch.Success)
+					streetFound = IsStreet(input);
+					if (streetFound)
 					{
-						var city = cityMatch.Groups[0].Value;
-						postalAddress.City = city;
-						addressWithoutLabel = addressWithoutLabel.Replace(city, string.Empty);
-						Console.WriteLine("Found city: {0}, remaining string: {1}", city, addressWithoutLabel);
+						Console.WriteLine("Found street, skipping to next line");
+						return;
 					}
-
+					else Console.WriteLine("No street found");
 				}
-				else if (cityMatch.Success)
+				Console.WriteLine("cityFound? {0}", cityFound);
+				if (!cityFound)
 				{
-					var city = cityMatch.Groups[0].Value;
-					postalAddress.City = city;
-					addressWithoutLabel = addressWithoutLabel.Replace(city, string.Empty);
-					Console.WriteLine("Found city: {0}, remaining string: {1}", city, addressWithoutLabel);
-
-					if (postalMatch.Success)
+					cityFound = IsCity(input);
+					if (cityFound)
 					{
-						var postal = postalMatch.Groups[0].Value;
-						postalAddress.PostalCode = postal;
-						addressWithoutLabel = addressWithoutLabel.Replace(postal, string.Empty);
-						Console.WriteLine("Found postal: {0}, remaining string: {1}", postal, addressWithoutLabel);
+						Console.WriteLine("Found city, skipping to next line");
+						return;
 					}
+					else Console.WriteLine("No city found");
 				}
-			}*/
-
-			//extract City
-				/*var cityRegex = new Regex(RegexHelper.CITYREGEX);
-				var cityMatch = cityRegex.Match(addressWithoutLabel);
-				if (cityMatch.Success)
+				Console.WriteLine("citypostalFound? {0}", citypostalFound);
+				if (!citypostalFound)
 				{
-					var city = cityMatch.Groups[0].Value;
-					postalAddress.City = city;
-					addressWithoutLabel = addressWithoutLabel.Replace(city, string.Empty);
-					Console.WriteLine("Found city: {0}, remaining string: {1}", city, addressWithoutLabel);
-				} else Console.WriteLine("No city found, remaining string: {0}", addressWithoutLabel);*/ 
-
-				//extract Country
-				/*var countryRegex = new Regex(RegexHelper.COUNTRYREGEX);
-				var countryMatch = countryRegex.Match(addressWithoutLabel);
-				if (countryMatch.Success)
-				{
-					var country = countryMatch.Groups[0].Value;
-					postalAddress.Country = country;
-					addressWithoutLabel = addressWithoutLabel.Replace(country, string.Empty);
-					Console.WriteLine("Found country: {0}, remaining string: {1}", country, addressWithoutLabel);
-				} else Console.WriteLine("No country found, remaining string: {0}", addressWithoutLabel); */
-
-				//extract ZIP/Postal Code
-				/*var postalRegex = new Regex(RegexHelper.POSTALREGEX);
-				var postalMatch = postalRegex.Match(addressWithoutLabel);
-				if (postalMatch.Success)
-				{
-					var postal = postalMatch.Groups[0].Value;
-					postalAddress.PostalCode = postal;
-					addressWithoutLabel = addressWithoutLabel.Replace(postal, string.Empty);
-					Console.WriteLine("Found postal: {0}, remaining string: {1}", postal, addressWithoutLabel);
-				} else Console.WriteLine("No postal found, remaining string: {0}", addressWithoutLabel);
-
-				addresses.Add(new CNLabeledValue<CNPostalAddress>("work", (CNPostalAddress)postalAddress));
-				contact.PostalAddresses = addresses.ToArray();
-				if(streetFound || cityFound) Console.WriteLine("Found address: {0}, {1}", 
-				                                               postalAddress.Street, postalAddress.City);
-				return true;
+					citypostalFound = IsCityAndPostal(input);
+					if (citypostalFound)
+					{
+						Console.WriteLine("Found citypostal, skipping to next line");
+						return;
+					}
+					else Console.WriteLine("No citypostal found");
+				}
 			}
-			Console.WriteLine("No address found in textline");
-			return false;*/
-		}
-
-		bool IsPosition() {
-			throw new NotImplementedException();
 		}
 
 		string CorrectWWWURLOCRError(string input) {

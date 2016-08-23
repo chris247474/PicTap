@@ -5,7 +5,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicTap", "PicTap\PicTap.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicTap.UITests", "PicTap.UITests\PicTap.UITests.csproj", "{FC125107-1188-400D-AA38-66AC59F0A052}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPDFCamera_Binding", "..\..\..\Projects\IPDFCamera_Binding\IPDFCamera_Binding\IPDFCamera_Binding.csproj", "{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPDFCamera_Binding", "..\..\IPDFCameraViewControllerBinding\IPDFCameraViewControllerBinding\IPDFCamera_Binding.csproj", "{2136FAC7-8D75-42DE-9CDB-08B7E334B815}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,17 +41,17 @@ Global
 		{FC125107-1188-400D-AA38-66AC59F0A052}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC125107-1188-400D-AA38-66AC59F0A052}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC125107-1188-400D-AA38-66AC59F0A052}.Release|Any CPU.Build.0 = Release|Any CPU
-		{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
-		{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}.Release|iPhone.ActiveCfg = Release|Any CPU
-		{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}.Release|iPhone.Build.0 = Release|Any CPU
-		{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
-		{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}.Debug|iPhone.ActiveCfg = Debug|Any CPU
-		{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}.Debug|iPhone.Build.0 = Debug|Any CPU
-		{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2136FAC7-8D75-42DE-9CDB-08B7E334B815}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{2136FAC7-8D75-42DE-9CDB-08B7E334B815}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{2136FAC7-8D75-42DE-9CDB-08B7E334B815}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{2136FAC7-8D75-42DE-9CDB-08B7E334B815}.Release|iPhone.Build.0 = Release|Any CPU
+		{2136FAC7-8D75-42DE-9CDB-08B7E334B815}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{2136FAC7-8D75-42DE-9CDB-08B7E334B815}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{2136FAC7-8D75-42DE-9CDB-08B7E334B815}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{2136FAC7-8D75-42DE-9CDB-08B7E334B815}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{2136FAC7-8D75-42DE-9CDB-08B7E334B815}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2136FAC7-8D75-42DE-9CDB-08B7E334B815}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2136FAC7-8D75-42DE-9CDB-08B7E334B815}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2136FAC7-8D75-42DE-9CDB-08B7E334B815}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

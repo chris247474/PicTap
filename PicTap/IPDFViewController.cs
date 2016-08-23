@@ -7,19 +7,21 @@ using System.Threading.Tasks;
 using Contacts;
 using System.Collections.Generic;
 using ContactsUI;
-using IPDFCamera_Binding;
 using System.Threading;
+using Acr.UserDialogs;
+using IPDFCameraViewControllerBinding;
 
 namespace PicTap
 {
     public partial class IPDFViewController : UIViewController
     {
-		ImagePreProcessor ImageHelper = new ImagePreProcessor();
+		ImageReader ImageHelper = new ImageReader();
 		UIImageView captureImageView = new UIImageView();
-		NSString flashOn = (NSString)@"FLASH On", flashOff = (NSString)@"FLASH Off",
-		filterOn = (NSString)@"FLASH On", filterOff, singleDetect = (NSString)@"single", 
-		multiDetect = (NSString)@"multi";
+		//NSString flashOn = (NSString)@"FLASH On", flashOff = (NSString)@"FLASH Off",
+		//filterOn = (NSString)@"FLASH On", filterOff, singleDetect = (NSString)@"single", 
+		//multiDetect = (NSString)@"multi";
 		UITapGestureRecognizer dismissTap;
+		bool adjustImageFrame = false;
 
 		WeakReference weakSelf;
 		IPDFViewController WeakSelf
@@ -83,7 +85,7 @@ namespace PicTap
 			ipdfView.Start();
 
 			//UserInteractionHelper.CheckIfPremiumShowAdsIfNot();
-			UserInteractionHelper.StoreUserEmail();
+			//UserInteractionHelper.StoreUserEmail();
 		}
 
 		partial void ChoosePhotoButton_TouchUpInside(UIButton sender)
@@ -121,7 +123,6 @@ namespace PicTap
 
 				/*await ImageHelper.ReadBusinessCardThenSaveExport_Tesseract(
 					transformedcropped, ProgressBar, loadingView, true);*/
-				//Console.WriteLine("ping is {0}", PingService.GetPingRate("www.google.com"));
 
 				/*await ImageHelper.ReadBusinessCardThenSaveExportHandleTimeout_MicrosoftVision(
 					transformedcropped,
@@ -132,9 +133,6 @@ namespace PicTap
 			}
 
 			EnableDisableUI();
-			/*CaptureBtn.Enabled = true;
-			ChoosePhotoButton.Enabled = true;
-			FlashButton.Enabled = true;*/
 			Console.WriteLine("loadContactsFromPic Done");
 		}
 
@@ -194,12 +192,14 @@ namespace PicTap
 		void dismissPreview(UITapGestureRecognizer dismissTapParam)
 		{
 			Console.WriteLine("dismiss tap");
-			UIView.Animate(0.7, 0, UIViewAnimationOptions.AllowUserInteraction,
+			UIView.AnimateNotify(0.9, 0, (nfloat)0.8, (nfloat)0.6, UIViewAnimationOptions.AllowUserInteraction,
 				() =>
 				{
-					dismissTapParam.View.Frame = CGRect.Inflate(this.View.Bounds, 0, this.View.Bounds.Size.Height);
+					//dismissTapParam.View.Frame = CGRect.Inflate(this.View.Bounds, 0, this.View.Bounds.Size.Height);
+					dismissTapParam.View.Frame = new CGRect(WeakSelf.View.Bounds.X, WeakSelf.View.Bounds.Height*2,
+													WeakSelf.View.Bounds.Width, WeakSelf.View.Bounds.Height);
 				},
-			     ()=> {
+			     (bool finished)=> {
 					 dismissTapParam.View.RemoveFromSuperview();
 				}
 			);
@@ -209,7 +209,7 @@ namespace PicTap
 		{
 			var filename = System.DateTime.Now.Second + "cropped.png";
 			Console.WriteLine("Saving Image, {0}", filename);
-			ImageHelper.SaveImageToPhotosApp(captureImageView.Image,
+			DeviceUtil.SaveImageToPhotosApp(captureImageView.Image,
 				filename);
 			Console.WriteLine("Done with IPDFCamera.SaveImage()");
 		}
@@ -233,36 +233,6 @@ namespace PicTap
 					});
 				}
 			);
-		}*/
-
-		/*partial void CaptureButton_TouchUpInside(UIButton sender)
-		{
-			this.ipdfView.CaptureImageWithCompletionHander(new Action<NSString>((NSString imageFilePath) =>
-			{
-				captureImageView = new UIImageView(new UIImage(imageFilePath));
-				captureImageView.BackgroundColor = UIColor.White;
-				captureImageView.BackgroundColor.ColorWithAlpha((nfloat)0.7);
-				captureImageView.Frame = CGRect.Inflate(WeakSelf.View.Bounds, 0, -WeakSelf.View.Bounds.Size.Height);
-				captureImageView.Alpha = (nfloat)1.0;
-				captureImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
-				captureImageView.UserInteractionEnabled = true;
-				WeakSelf.View.AddSubview(captureImageView);
-
-				UITapGestureRecognizer dismissTap = new UITapGestureRecognizer(dismissPreview);
-				captureImageView.AddGestureRecognizer(dismissTap);
-
-				UIView.Animate(0.7, 0, UIViewAnimationOptions.AllowUserInteraction,
-					() =>
-					{
-						captureImageView.Frame = WeakSelf.View.Bounds;
-					},
-					async () =>
-					{
-						await ImageHelper.loadContactsFromPic(captureImageView.Image, true, true, View);
-						dismissTap.View.RemoveFromSuperview();
-					}
-				);
-			}));
 		}*/
 
 		/*partial void FilterButton_TouchUpInside(UIButton sender)
@@ -292,9 +262,13 @@ namespace PicTap
 			this.ipdfView.CaptureImageWithCompletionHander(new Action<NSString>((NSString imageFilePath) =>
 			{
 				captureImageView = new UIImageView(new UIImage(imageFilePath));
-				captureImageView.BackgroundColor = UIColor.White;
-				captureImageView.BackgroundColor.ColorWithAlpha((nfloat)0.7);
-				captureImageView.Frame = CGRect.Inflate(WeakSelf.View.Bounds, 0, -WeakSelf.View.Bounds.Size.Height);
+
+				captureImageView.BackgroundColor = 
+					UIColor.Black.ColorWithAlpha((nfloat)0.7);
+				
+				captureImageView.Frame = new CGRect(WeakSelf.View.Bounds.X, -WeakSelf.View.Bounds.Height,
+				                                    WeakSelf.View.Bounds.Width, WeakSelf.View.Bounds.Height);             
+
 				captureImageView.Alpha = (nfloat)1.0;
 				captureImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
 				captureImageView.UserInteractionEnabled = true;
@@ -302,17 +276,22 @@ namespace PicTap
 
 				dismissTap = new UITapGestureRecognizer(dismissPreview);
 				captureImageView.AddGestureRecognizer(dismissTap);
-
-				UIView.Animate(0.7, 0, UIViewAnimationOptions.AllowUserInteraction,
+					
+				UIView.AnimateNotify(0.8, 0.0, (nfloat)1.0, (nfloat)0.5,
+				    UIViewAnimationOptions.AllowUserInteraction, 
 					() =>
 					{
 						captureImageView.Frame = WeakSelf.View.Bounds;
-					},
-					async () =>
-					{
-						loadContactsFromPic(captureImageView.Image, true);//move to before task.delay? it will feel faster for user
-						await Task.Delay(2000);
-						dismissTap.View.RemoveFromSuperview();
+					}, 
+				    (bool finished) => { 
+						Console.WriteLine("Capture image finished: {0}", finished);
+						if (finished)
+						{
+							loadContactsFromPic(captureImageView.Image, true);
+							//await Task.Delay(3000);
+							//dismissPreview(dismissTap);
+						}
+						else UserDialogs.Instance.Alert("Please try again", "Something went wrong", "OK");
 					}
 				);
 			}));

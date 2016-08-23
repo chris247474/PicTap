@@ -5,17 +5,21 @@ namespace PicTap
 {
 	public static class RegexHelper
 	{
-		public const string LABELEDEMAILREGEX =
-			"(\\s*[A-Z]*[a-z]*.*:\\s*)*\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";//"(\s*[A-Z]*[a-z]*:\s*)*\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*";
+		public const string LABELEDEMAILREGEX = LABELREGEX + EMAILREGEX;//"(([A-Z]*[a-z]*\\-*)*\\.*:\\s*)*" + EMAILREGEX;
+			//"(\\s*[A-Z]*[a-z]*.*:\\s*)*\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";//"(\s*[A-Z]*[a-z]*:\s*)*\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*";
 		public const string EMAILREGEX = "\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
 		public const string ALLNUMBERSREGEX = "((\\()*(\\))*(\\d+)*(\\s)*(-)*(\\d+)*(-)*)*";
 		public const string SINGLENUMREGEX = "((\\+)*(\\()*(\\))*(\\d+)*(\\s)*(-)*(\\d+)*(-)*)*";
 		public const string STRICTNUMREGEX = "((\\+)*(\\d)*(\\s)*)*";
-		public const string MULTILABELEDNUMREGEX = //does not detect multiple numbers in the same line (need to add *)
-			"(\\s*[A-Z]*[a-z]*.*:\\s*)*((\\+)*(\\()*(\\))*(\\d)+(\\d)+(\\d)+(\\d)+(\\d)+(\\s)*(\\-)*)+";
+		public const string MULTILABELEDNUMREGEX =
+			LABELREGEX+"((\\+)*(\\()*(\\))*(\\d)+(\\d)+(\\d)+(\\d)+(\\d)+(\\s)*(\\-)*)";
+		//"(\\s*[A-Z]*[a-z]*.*:\\s*)*((\\+)*(\\()*(\\))*(\\d)+(\\d)+(\\d)+(\\d)+(\\d)+(\\s)*(\\-)*)";
+		//@"(\s*[A-Z]*[a-z]*.*:\s*)*((\+)*(\()*(\))*(\d)+(\d)+(\d)+(\d)+(\d)+(\s)*(\-)*)+";
 		//"(\\s)*([A-Z]*[a-z]*(\\:)*(\\s)*)*(\\s)*((\\+)*(\\()*(\\))*(\\d+)*(\\s)*(-)*(\\d+)*(-)*)*";
 		//"(\\s)*((\\w)*(\\s)*(\\:)*)((\\+)*(\\()*(\\))*(\\d+)*(\\s)*(-)*(\\d+)*(-)*)*";
-		public const string LABELREGEX = "(\\s*[A-Z]*[a-z]*.*:\\s*)*";
+		public const string LABELREGEX = "(([A-Z]*[a-z]*\\-*)*\\.*:\\s*)*";
+		//@"(([A-Z]*[a-z]*\-*)*\.*:\s*)";//@"(([A-Z]*[a-z]*)*\.*:\s*)";//label doesnt accept dashes, fix
+		//@"(\s*[A-Z]*[a-z]*.*:\s*)*";		
 			//"(\\s)*([A-Z]*[a-z]*(\\:)*(\\s)*)*";
 			//"(\\s)*([A-Z]*[a-z]*(\\:)*(\\s)*)*(\\s)*";//"(\\s)*((\\w)*(\\s)*(\\:)*)(\\s)*";
 		public const string SINGLENAMEREGEX = "([A-Z]*[a-z]*)(\\\\s*)*";
@@ -53,13 +57,19 @@ namespace PicTap
 		public const string WWWSTRING = "www";
 		public const string WWWDOTSTRING = "www.";
 		public const string COMPANYSTRINGS = 
-			"COMPANY CORP ORG INC INDUSTRIES TELECOM BANK PHILIPPINES LAND TECHNOLOGY CONSULTAN ELECTRON FOOD COMPUTERS" +
+			"& COMPANY CORP ORG INC INDUSTRIES TELECOM BANK PHILIPPINES LAND TECHNOLOGY CONSULTAN ELECTRON FOOD COMPUTERS" +
 			"EXPRESS DELIVERY BOOKS GROUP BUSINESS PREMIER GYM BOXING OFFICE DEVELOPMENT ENERGY";
 		public const string JOBTITLES = "manager associate president assistant secretary operations ceo coo cto cpa" +
 			"lawyer consultant director marketing specialist trainee trainer teacher professor doctor Dr. broker attorney designer" +
 			"planner executive prc architect deputy senior junior managing";
 		public const string CITYLABELS = "city";
-		public const string STREETLABELS = "st st. ave avenue road loop alley";
+		public const string STREETLABELS = "st. ave avenue road loop alley";
+		public const string SINGLESPECIALCHARREGEX =
+			"(\\(*\\)*\\**\\'*\\`*\\~*\\.*\\,*\\?*\\:*\\;*\\\\*\\/*\\[*\\]*\\{*\\}*\\<*\\>*\\!*\\@*\\&*\\^*\\&*\\%*\\$*\\#*\\|*\\-*\\=*\\\"*)";//\+*
+																																			   //"(\\(*\\)*\\**\\'*\\`*\\~*\\.*\\,*\\?*\\:*\\;*\\\\*\\/*\\[*\\]*\\{*\\}*\\<*\\>*\\+*\\!*\\@*\\&*\\^*\\&*\\%*\\$*\\#*\\|*\\-*\\=*\\\"*)";
+		public const string OCRCHARERRORSREGEX =
+			"(\\(*\\)*\\**\\'*\\`*\\~*\\,*\\?*\\[*\\]*\\{*\\}*\\<*\\>*\\!*\\@*\\&*\\^*\\&*\\%*\\$*\\#*\\|*\\-*\\=*\\\"*\\.*)";
+			//@"(\(*\)*\**\'*\`*\~*\,*\?*\[*\]*\{*\}*\<*\>*\!*\@*\&*\^*\&*\%*\$*\#*\|*\-*\=*\""*)";
 
 
 		public static string subtractFromString(string stringToRemove, string originalString)
@@ -68,9 +78,7 @@ namespace PicTap
 		}
 		public static string RemoveCountryCodeReadingErrorsAndSpecialChar(string input, Regex countryCode = null, Regex special = null)
 		{
-			special = new Regex(Values.SINGLESPECIALCHARREGEX);
-			//countryCode = new Regex(Values.COUNTRYCODE);
-			//return countryCode.Replace(
+			special = new Regex(OCRCHARERRORSREGEX);//SINGLESPECIALCHARREGEX);
 			return special.Replace(
 				input.Replace(Values.WEIRDCHARFL, "").Replace(Values.WEIRDQUOTE, "").Replace(
 					Values.LONGDASH, "").Replace(Values.UNDERLINE, "").Replace(
@@ -129,7 +137,7 @@ namespace PicTap
 		{
 			string firstname = "", lastname = "";
 			var wordReg = new Regex(Values.WORDREGEX);
-			var specialReg = new Regex(Values.SINGLESPECIALCHARREGEX);
+			var specialReg = new Regex(SINGLESPECIALCHARREGEX);
 			Match wordMatch = wordReg.Match(RemoveCountryCodeReadingErrorsAndSpecialChar(
 				rawName, new Regex(Values.COUNTRYCODE), specialReg));
 			//Match wordMatch = wordReg.Match(rawName);

@@ -25,14 +25,14 @@ namespace PicTap
 
 			if (string.Equals(result, openin))
 			{
-				NativeDeviceUtil.Share(CombineContactDataForExporting(contact));
+				DeviceUtil.Share(CombineContactDataForExporting(contact));
 			}
 			else if (string.Equals(result, saveto))
 			{
 				ContactsHelper.PushNewContactDialogue(contact);
 			}else if (string.Equals(result, copyto))
 			{
-				ClipBoardService.CopyToClipboard(textClipboard);
+				DeviceUtil.CopyToClipboard(textClipboard);
 				UserDialogs.Instance.Alert("Copied!", null, "OK");
 			}
 		}

@@ -8,14 +8,10 @@ using System.Runtime.InteropServices;
 
 namespace PicTap
 {
-    class NativeDeviceUtil
+    class DeviceUtil
 	{
-		ABAddressBook abb = new ABAddressBook();
-		ABPerson[] contacts = null;
-
-		public NativeDeviceUtil(){
+		public DeviceUtil(){
 			Console.WriteLine ("Storing all contacts in iOS memory");
-			contacts = abb.GetPeople ();
 		}
 
 		public static async void Share (string message)
@@ -35,7 +31,26 @@ namespace PicTap
 
 			topController.PresentViewController (activityController, true, () => {
 			});
+		}
 
+		public static void CopyToClipboard(String text)
+		{
+			UIPasteboard.General.String = text;
+		}
+
+		public static void SaveImageToPhotosApp(UIImage someImage, string filename)
+		{
+			try
+			{
+				someImage.SaveToPhotosAlbum((image, error) =>
+				{
+					var o = image as UIImage;
+				});
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("error saving processed image: {0}", e.Message);
+			}
 		}
 
 		public async Task SendSMS (string number){

@@ -20,7 +20,7 @@ using Tesseract;
 
 namespace PicTap
 {
-	public class ImagePreProcessor
+	public class ImageReader
 	{
 		const int SUCCESSTHRESHOLD = 28;
 		public const double TIMEOUTLIMIT = 8000;
@@ -30,7 +30,7 @@ namespace PicTap
 				orgFound = false, goToNextIteration = false, streetFound = false, citypostalFound = false,
 				cityFound = false, jobFound = false;//, allowCancelMicrosoftVisionOCRTask = false;
 
-		public ImagePreProcessor()
+		public ImageReader()
 		{
 			
 		}
@@ -403,7 +403,7 @@ namespace PicTap
 
 			for (int c = 0; c < inputImages.Length; c++) {
 				Console.WriteLine("processing image {0} for test array", c);
-				var preProcessedImage = await PreprocessUIImage(inputImages[c], true);
+				var preProcessedImage = await OCRPreProcessor.PreprocessUIImage(inputImages[c], true);
 				//var scaledImage = ScaleImage(inputImages[c]);
 				inputImages[c] = preProcessedImage;
 				Console.WriteLine("Done processing image {0} for test array", c);
@@ -747,7 +747,7 @@ namespace PicTap
 									  cancelToken.IsCancellationRequested,
 									  readTask.Status);
 		*/
-		public async Task<OcrResults> ExtractOCRResultFromImage_ProjectOxford(Stream image, 
+		public async Task<OcrResults> ExtractOCRResultFromImage_MicrosoftVision(Stream image, 
 		                                                                      bool canTimeout = false)
 		{
 			Console.WriteLine("In ExtractTextFromImage_ProjectOxford");
@@ -862,30 +862,7 @@ namespace PicTap
 			
 		}
 
-		public UIImage ScaleImage(UIImage image, float maxDimension = 960){
-			var scaledSize = new CGSize(maxDimension, maxDimension);
-			nfloat scaleFactor = 0;
 
-			if (image.Size.Width > image.Size.Height) {
-				scaleFactor = image.Size.Height / image.Size.Width;
-				scaledSize.Width = maxDimension;
-				scaledSize.Height = scaledSize.Width * scaleFactor;
-			 }
-			else {
-				scaleFactor = image.Size.Width / image.Size.Height;
-				scaledSize.Height = maxDimension;
-				scaledSize.Width = scaledSize.Height * scaleFactor;
-		  	}
-
-			UIGraphics.BeginImageContext(scaledSize); //UIGraphicsBeginImageContext(scaledSize)
-			image.Draw(new CGRect(0,0,scaledSize.Width, scaledSize.Height));//(CGRectMake(0, 0, scaledSize.width, scaledSize.height))
-			var scaledImage = UIGraphics.GetImageFromCurrentImageContext();//scaledImage = UIGraphicsGetImageFromCurrentImageContext()
-			UIGraphics.EndImageContext();// UIGraphicsEndImageContext()
-
-			Console.WriteLine("Scaled image to {0}, {1}", scaledImage.Size.Width, scaledImage.Size.Height);
-
-			return scaledImage;
-		}
 
 		public async Task ReadBusinessCardThenSaveExport_Tesseract(UIImage image, UIProgressView progressBar, 
 		                                                           UIActivityIndicatorView loadingView, bool preProcessImage = true)
@@ -902,7 +879,7 @@ namespace PicTap
 			int progressCtr = 0;
 
 			//Preprocess image for better text recognition results - adds too much overhead time
-			if(preProcessImage) image = await PreprocessUIImage(image, false, true);
+			if(preProcessImage) image = await OCRPreProcessor.PreprocessUIImage(image, false, true);
 
 			//save for testing purposes
 			//SaveImageToPhotosApp(preProcessedStream, System.DateTime.Now.Second + "bwsharp.png");
@@ -918,8 +895,6 @@ namespace PicTap
 				wholeTextForClipboard += "\n" + line.Text;
 				textline = line.Text;
 				progressCtr++;
-				//var readingProgress = progressBar.Progress + (float)(progressCtr / totalLines);
-				//progressBar.SetProgress(readingProgress, true);
 				goToNextIteration = false;//reset
 
 				//compare line to regex
@@ -1055,11 +1030,9 @@ namespace PicTap
 				int progressCtr = 0;
 				string wholeTextForClipboard = "";
 
-				image = GetStreamFromUIImage(ScaleImage(GetUIImageFromStream(image)));
+				image = GetStreamFromUIImage(OCRPreProcessor.ScaleImage(GetUIImageFromStream(image)));
 
-				result = await ExtractOCRResultFromImage_ProjectOxford(image);
-				//GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(
-				//	() => progressBar.SetProgress(0.5f, true));
+				result = await ExtractOCRResultFromImage_MicrosoftVision(image);
 
 				foreach (var region in result.Regions)
 				{
@@ -1069,11 +1042,6 @@ namespace PicTap
 						Console.WriteLine("In lines");
 						wholeTextForClipboard += "\n" + CombineWordsIntoLine(line);
 						progressCtr++;
-						/*GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(() =>
-						{
-							var readingProgress = progressBar.Progress + (float)(progressCtr / (float)region.Lines.Count());
-							progressBar.SetProgress(readingProgress, true);
-						});*/
 						goToNextIteration = false;//reset
 
 						//compare line to regex
@@ -1448,7 +1416,9 @@ namespace PicTap
 		bool IsEmail(string input) { 
 			//input = //RegexHelper.RemoveCountryCodeReadingErrorsAndSpecialChar(
 				//RegexHelper.RemoveCommonTesseractEmailErrors(input);//);
-			Console.WriteLine("input filtered errors and special chars:{0}", input);
+			Console.WriteLine("IsEmail: input filtered errors and special chars:{0}", input);
+
+			if (!input.Contains(RegexHelper.ATSTRING)) return false;
 
 			var emailRegex = new Regex(RegexHelper.LABELEDEMAILREGEX);
 			var emailMatch = emailRegex.Match(input);
@@ -1458,6 +1428,15 @@ namespace PicTap
 				var labeledEmailMatchString = emailMatch.Groups[0].Value;
 				var labelReg = new Regex(RegexHelper.LABELREGEX);
 				Match labelMatch = labelReg.Match(labeledEmailMatchString);
+
+				//subtract rawMatchString from input, if any left, then run IsEmail on that
+				var remainingStringMatch = input.Replace(labeledEmailMatchString, "");
+				Console.WriteLine("IsEmail: remaining string is {0}", remainingStringMatch);
+				if (!string.IsNullOrWhiteSpace(remainingStringMatch))
+				{
+					var foundAnother = IsEmail(remainingStringMatch);
+					if (foundAnother) Console.WriteLine("Found another email in the same line");
+				}
 
 				//remove  label if any
 				if (labelMatch.Success)
@@ -1571,21 +1550,68 @@ namespace PicTap
 			}
 			return false;
 		}
+
+		public delegate bool TextElementDelegate(string remainingString);
+
+		void CheckForRemainingMatchesInTextLine(string remainingString, TextElementDelegate textDelegate) {
+			//subtract rawMatchString from input, if any left, then run IsNumber on that
+			Console.WriteLine("CheckForRemainingMatchesInTextLine: remaining string is {0}", 
+			                  remainingString);
+			if (!string.IsNullOrWhiteSpace(remainingString))
+			{
+				var foundAnother = textDelegate(remainingString);
+				if (foundAnother) Console.WriteLine("Found another in the same line");
+			}
+		}
+
+		bool HasNumberInString(string input) {
+			bool hasNumber = false;
+			for (int c = 0; c < input.Length; c++)
+			{
+				try
+				{
+					double.Parse(input[c].ToString());
+					return true;
+				}
+				catch (FormatException e)
+				{
+					Console.WriteLine("Found letter");
+				}
+			}
+			return hasNumber;
+		}
+
 		bool IsNumber(string input) {
+			//check for numbers in input string
+			if (!HasNumberInString(input)) return false;
+
 			var numReg = new Regex(RegexHelper.MULTILABELEDNUMREGEX);
 			input = RegexHelper.RemoveCountryCodeReadingErrorsAndSpecialChar(input);
-			input = input.Replace(" ", "");
-			Console.WriteLine("filtered input: {0}", input);
+			//input = input.Replace(" ", "");
+			Console.WriteLine("IsNumber: filtered input: {0}", input);
 			var numMatch = numReg.Match(input);
+			Console.WriteLine("numMatch found");
 
 			var strictNumRegex = new Regex(RegexHelper.STRICTNUMREGEX);
 			string strictMatchString = string.Empty;
-			
+			Console.WriteLine("strictNumRegex init");
+
+			Console.WriteLine("Checking for success");
 			if (numMatch.Success){
 				var number = string.Empty;
 				var rawMatchString = numMatch.Groups[0].Value;
-				Console.WriteLine("Found labeled number match: {0}", rawMatchString);
 
+				Console.WriteLine("success");
+				//subtract rawMatchString from input, if any left, then run IsNumber on that
+				var remainingString = input.Replace(rawMatchString, "");
+				Console.WriteLine("IsNumber: remaining string is {0}", remainingString);
+				if (!string.IsNullOrWhiteSpace(remainingString))
+				{
+					var foundAnother = IsNumber(remainingString);
+					if(foundAnother) Console.WriteLine("Found another number in the same line");
+				}
+
+				Console.WriteLine("Found labeled number match: {0}", rawMatchString);
 				var numLabelReg = new Regex(RegexHelper.LABELREGEX);
 				Match labelMatch = numLabelReg.Match(rawMatchString);
 
@@ -1806,148 +1832,30 @@ namespace PicTap
 			return string.Empty;
 		}*/
 
-		public void SaveImageToPhotosApp(UIImage someImage, string filename){
-			try{
-				someImage.SaveToPhotosAlbum((image, error) => {
-					var o = image as UIImage;
-				});
-			}catch(Exception e){
-				Console.WriteLine ("error saving processed image: {0}", e.Message);
-			}
-		}
 
-		public async Task<UIImage> PreprocessUIImage(UIImage transformedcroppedimage, 
-		                                             bool saveImage = false, bool useGPU = false)
+
+		public Stream GetStreamFromFilename(string file)
 		{
-			Console.WriteLine("in PreprocessImage");
-
-			if (transformedcroppedimage != null) {
-				//var result = GetStreamFromUIImage(ApplyGreyScale(transformedcroppedimage));
-				var scaledImage = ScaleImage(transformedcroppedimage, 960);
-				StopWatchHelper.StartTimer();
-				var sharpenedImage = UnSharpMask(scaledImage, useGPU);
-				StopWatchHelper.StopTimer();
-				Console.WriteLine("unsharp timer done");
-
-				/*if (saveImage)
-				{
-					GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(
-						()=>SaveImageToPhotosApp(sharpenedImage, System.DateTime.Now.Second + "bwsharp.png"));
-				}*/
-
-				//StopWatchHelper.StartTimer();
-				var adaptiveThreshImage = AdaptiveThreshold(sharpenedImage);
-				//StopWatchHelper.StopTimer();
-				//Console.WriteLine("timer done");
-
-				UIImage finalImage = (adaptiveThreshImage == null) ? sharpenedImage : adaptiveThreshImage;
-
-				if (saveImage)
-				{
-					GlobalVariables.VCToInvokeOnMainThread.InvokeOnMainThread(
-						() => SaveImageToPhotosApp(finalImage, System.DateTime.Now.Second + "bwsharp.png"));
-				}
-
-				Console.WriteLine("Done preprocessing");
-				return finalImage;
-			}
-			Console.WriteLine("Failed preprocessing");
-			return null;
-		}
-
-		public UIImage AdaptiveThreshold(UIImage inputImage) {
-			if (inputImage != null) {
-				//var greyScale = new GPUImageGrayscaleFilter();
-				var imageFilter = new GPUImageAdaptiveThresholdFilter {BlurRadiusInPixels = 5 };
-				return imageFilter.CreateFilteredImage(/*greyScale.CreateFilteredImage(*/inputImage);//));
-			}
-			return null;
-		}
-
-		public UIImage ApplyGreyScale(UIImage image) { 
-			if (image != null)
-			{
-				var greyScale = new GPUImageGrayscaleFilter();
-				return greyScale.CreateFilteredImage(image);
-			}
-			return null;
-		}
-
-		/*public Task<byte[]> Crop(UIImage image)
-		{
-			//var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			//var file = Path.Combine (documents, fileName);
-		    //var image = UIImage.FromFile(file);
-
-			//try{
-				var viewController = new TOCrop.TOCropViewController(image);
-				var rootViewController = UIApplication.SharedApplication.KeyWindow.RootViewController;//UIApplication.SharedApplication.Delegate.GetWindow().RootViewController;
-				return viewController.ShowCropViewAsync(rootViewController, true, null);
-			//}catch(Exception e){
-			//	Console.WriteLine ("Crop error: {0}", e.Message);
-			//}
-
-			//return null;
-		}*/
-
-		UIImage UnSharpMask(UIImage origImage, bool useGPU = false){
-			if (useGPU)
-			{
-				if (origImage != null)//around the same for Tesseract
-				{
-					var unsharpFilter = new GPUImageUnsharpMaskFilter()
-					{
-						BlurRadiusInPixels = (nfloat)6,
-						Intensity = (float)0.5
-					};
-					return unsharpFilter.CreateFilteredImage(origImage);
-				}
-			}
-			else { 
-				var imageToSharpen = CIImage.FromCGImage(origImage.CGImage);//better for Microsoft Vision
-
-				// Create a CIUnsharpMask filter with the input image
-				var unsharp_mask = new CIUnsharpMask()
-				{
-					Image = imageToSharpen,
-					Radius = 7.0f//, Intensity = 1.5f
-				};
-				// Get the altered image from the filter
-				var output = unsharp_mask.OutputImage;
-
-				// To render the results, we need to create a context, and then
-				// use one of the context rendering APIs, in this case, we render the
-				// result into a CoreGraphics image, which is merely a useful representation
-				//
-				var context = CIContext.FromOptions(null);
-
-				var cgimage = context.CreateCGImage(output, output.Extent);
-
-				return UIImage.FromImage(cgimage);
-			}
-			return null;
-		}
-
-
-		public Stream GetStreamFromFilename(string file){
 			//Console.WriteLine ("In GetStreamFromFilename");
-			return GetStreamFromUIImage (UIImage.FromFile (file));
+			return GetStreamFromUIImage(UIImage.FromFile(file));
 		}
-		public Stream GetStreamFromUIImage(UIImage image){
+		public Stream GetStreamFromUIImage(UIImage image)
+		{
 			//Console.WriteLine ("In GetStreamFromUIImage");
-			return BytesToStream(UIImageToBytes (image));
+			return BytesToStream(UIImageToBytes(image));
 		}
-		public UIImage GetUIImageFromStream(Stream s){
+		public UIImage GetUIImageFromStream(Stream s)
+		{
 			//Console.WriteLine ("in GetUIImageFromStream");
-			return GetImagefromByteArray(StreamToBytes (s));
+			return GetImagefromByteArray(StreamToBytes(s));
 		}
 
-		public UIImage GetImagefromByteArray (byte[] imageBuffer)
+		public UIImage GetImagefromByteArray(byte[] imageBuffer)
 		{
 			//Console.WriteLine ("in GetImagefromByteArray");
 			NSData imageData = NSData.FromArray(imageBuffer);
 			//Console.WriteLine ("NSData loaded from bytes");
-			var img = UIImage.LoadFromData (imageData);
+			var img = UIImage.LoadFromData(imageData);
 			//Console.WriteLine ("UIImage null: {0}", (img == null) ? true : false);
 			return img;
 		}
@@ -1955,18 +1863,20 @@ namespace PicTap
 		public byte[] StreamToBytes(Stream input)
 		{
 			//Console.WriteLine ("In StreamToBytes");
-			using (MemoryStream ms = new MemoryStream()){
+			using (MemoryStream ms = new MemoryStream())
+			{
 				input.CopyTo(ms);
 				//Console.WriteLine ("bytes copied");
 				ms.Seek(0, SeekOrigin.Begin);
 				//Console.WriteLine ("seekorigin done");
-				input.Seek (0, SeekOrigin.Begin);
+				input.Seek(0, SeekOrigin.Begin);
 				//Console.WriteLine ("input seek done");
 				return ms.ToArray();
 			}
 		}
 
-		public Stream BytesToStream(byte[] image){
+		public Stream BytesToStream(byte[] image)
+		{
 			//Console.WriteLine ("In BytesToStream");
 			MemoryStream stream = new MemoryStream();
 			stream.Write(image, 0, image.Length);
@@ -1974,11 +1884,13 @@ namespace PicTap
 			return stream;
 		}
 
-		public byte[] UIImageToBytes(UIImage image){
+		public byte[] UIImageToBytes(UIImage image)
+		{
 			Byte[] myByteArray = null;
-			using (NSData imageData = image.AsPNG()) {
+			using (NSData imageData = image.AsPNG())
+			{
 				myByteArray = new Byte[imageData.Length];
-				System.Runtime.InteropServices.Marshal.Copy(imageData.Bytes, myByteArray, 0, 
+				System.Runtime.InteropServices.Marshal.Copy(imageData.Bytes, myByteArray, 0,
 					Convert.ToInt32(imageData.Length));
 			}
 			return myByteArray;

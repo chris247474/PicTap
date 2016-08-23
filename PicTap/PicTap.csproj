@@ -228,7 +228,7 @@
     <Compile Include="Models\BaseViewModel.cs" />
     <Compile Include="Helpers\RegexHelper.cs" />
     <Compile Include="Helpers\SQLite_iOS.cs" />
-    <Compile Include="Helpers\NativeDeviceUtil.cs" />
+    <Compile Include="Helpers\DeviceUtil.cs" />
     <Compile Include="Helpers\ContactsHelper.cs" />
     <Compile Include="Helpers\CNViewControllerDelegate.cs" />
     <Compile Include="Helpers\iOSNavigationHelper.cs" />
@@ -245,12 +245,13 @@
     <Compile Include="Helpers\TaskHelper.cs" />
     <Compile Include="Helpers\ContactsRecognitionHelper.cs" />
     <Compile Include="Helpers\GlobalVariables.cs" />
-    <Compile Include="Helpers\ImagePreProcessor.cs" />
+    <Compile Include="Helpers\ImageReader.cs" />
     <Compile Include="Helpers\UserInteractionHelper.cs" />
     <Compile Include="Helpers\NetworkStatusType.cs" />
     <Compile Include="Helpers\ClipBoardService.cs" />
     <Compile Include="Helpers\EmailService.cs" />
     <Compile Include="Helpers\PingService.cs" />
+    <Compile Include="Helpers\OCRPreProcessor.cs" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\capture_button%402x.png" />
@@ -313,8 +314,8 @@
     </XamarinComponentReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Projects\IPDFCamera_Binding\IPDFCamera_Binding\IPDFCamera_Binding.csproj">
-      <Project>{59C4A6EC-35A1-46B7-805A-42EEE32B05F8}</Project>
+    <ProjectReference Include="..\..\..\IPDFCameraViewControllerBinding\IPDFCameraViewControllerBinding\IPDFCamera_Binding.csproj">
+      <Project>{2136FAC7-8D75-42DE-9CDB-08B7E334B815}</Project>
       <Name>IPDFCamera_Binding</Name>
     </ProjectReference>
   </ItemGroup>

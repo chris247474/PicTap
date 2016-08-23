@@ -28,7 +28,7 @@ namespace PicTap
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
-        IPDFCamera_Binding.IPDFCamera ipdfView { get; set; }
+        IPDFCameraViewControllerBinding.IPDFCameraViewController ipdfView { get; set; }
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
@@ -54,13 +54,13 @@ namespace PicTap
         [GeneratedCode ("iOS Designer", "1.0")]
         partial void ChoosePhotoButton_TouchUpInside (UIKit.UIButton sender);
 
-        [Action ("CaptureBtn_TouchUpInside:")]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        partial void CaptureBtn_TouchUpInside (UIKit.UIButton sender);
-
         [Action ("TestButton_TouchUpInside:")]
         [GeneratedCode ("iOS Designer", "1.0")]
         partial void TestButton_TouchUpInside (UIKit.UIButton sender);
+
+        [Action ("CaptureBtn_TouchUpInside:")]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        partial void CaptureBtn_TouchUpInside (UIKit.UIButton sender);
 
         void ReleaseDesignerOutlets ()
         {

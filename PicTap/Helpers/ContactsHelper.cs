@@ -108,9 +108,14 @@ namespace PicTap
 							Title = title
 						};
 						Console.WriteLine("created UINavigationController");
-						navcontrol.PushViewController(controlToPush, true);
+
+						navcontrol.PushViewController(controlToPush, 
+							 !UIAccessibility.IsReduceMotionEnabled);
+						
 						Console.WriteLine("pushed contactsdialogue into navcontrol, showing UINavigationController");
-						vc.PresentViewController(navcontrol, true, () => { Console.WriteLine("navcontrol shown"); });
+						vc.PresentViewController(navcontrol, 
+						     !UIAccessibility.IsReduceMotionEnabled, 
+						     () => { Console.WriteLine("navcontrol shown"); });
 					});
 				}
 			}catch(Exception e){

@@ -14,23 +14,31 @@ namespace PicTap
 			Console.WriteLine ("Storing all contacts in iOS memory");
 		}
 
-		public static async void Share (string message)
+		public static void Share(string message, UIViewController vcForUIThread)
 		{
 			var messagecontent = message;
-			var msg = UIActivity.FromObject (messagecontent);
+			var msg = UIActivity.FromObject(messagecontent);
 
-			var item = NSObject.FromObject (msg);
-			var activityItems = new[] { item }; 
-			var activityController = new UIActivityViewController (activityItems, null);
+			var item = NSObject.FromObject(msg);
+			var activityItems = new[] { item };
+			var activityController = new UIActivityViewController(activityItems, null);
 
 			var topController = UIApplication.SharedApplication.KeyWindow.RootViewController;
 
-			while (topController.PresentedViewController != null) {
+			while (topController.PresentedViewController != null)
+			{
 				topController = topController.PresentedViewController;
 			}
 
-			topController.PresentViewController (activityController, true, () => {
-			});
+			if (vcForUIThread == null)
+			{
+				topController.PresentViewController(activityController, true, () => { });
+			}
+			else 
+			{
+				vcForUIThread.InvokeOnMainThread(() =>
+						topController.PresentViewController(activityController, true, () => { }));				
+			}
 		}
 
 		public static void CopyToClipboard(String text)

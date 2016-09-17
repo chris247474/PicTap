@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<component format="1" id="DACircularProgress" is-shell="true">
+  <name>DACircularProgress</name>
+  <publisher>Xamarin Inc</publisher>
+  <publisher-url>https://xamarin.com</publisher-url>
+  <version>2.3.1.0</version>
+  <summary>DACircularProgress is a UIView subclass with circular UIProgressView properties.</summary>
+  <packages>
+    <package id="DACircularProgress" version="2.3.1.0" framework="ios-unified" />
+    <package id="DACircularProgress" version="2.3.1.0" framework="ios" />
+  </packages>
+  <samples>
+    <sample id="DACircularProgressSample">
+      <name>iOS Sample</name>
+      <summary>iOS Sample</summary>
+    </sample>
+  </samples>
+</component>

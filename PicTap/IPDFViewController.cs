@@ -17,9 +17,6 @@ namespace PicTap
     {
 		ImageReader ImageHelper = new ImageReader();
 		UIImageView captureImageView = new UIImageView();
-		//NSString flashOn = (NSString)@"FLASH On", flashOff = (NSString)@"FLASH Off",
-		//filterOn = (NSString)@"FLASH On", filterOff, singleDetect = (NSString)@"single", 
-		//multiDetect = (NSString)@"multi";
 		UITapGestureRecognizer dismissTap;
 		bool adjustImageFrame = false;
 
@@ -79,11 +76,7 @@ namespace PicTap
 			Console.WriteLine("ViewDidAppear");
 			base.ViewDidAppear(animated);
 
-			//UITapGestureRecognizer focusTap = new UITapGestureRecognizer(focusGesture);
-			//ipdfView.AddGestureRecognizer(focusTap);
-
 			ipdfView.Start();
-
 			//UserInteractionHelper.CheckIfPremiumShowAdsIfNot();
 			//UserInteractionHelper.StoreUserEmail();
 		}
@@ -96,7 +89,7 @@ namespace PicTap
 		async Task ChoosePhoto() { 
 			var photoStream = await PhotoPickerService.ChoosePicture();
 			if (photoStream != null) {
-				loadContactsFromPic(ImageHelper.GetUIImageFromStream(photoStream), true);
+				loadContactsFromPic(StreamByteDataUIImageConverter.GetUIImageFromStream(photoStream), true);
 			}
 		}
 
@@ -129,7 +122,8 @@ namespace PicTap
 					ProgressBar, loadingView);*/ //fix task cancellation
 
 				await ImageHelper.ReadBusinessCardThenSaveExport_MicrosoftVision(
-					ImageHelper.GetStreamFromUIImage(transformedcropped), ProgressBar, loadingView, true);
+					StreamByteDataUIImageConverter.GetStreamFromUIImage(transformedcropped), 
+					ProgressBar, loadingView, true);
 			}
 
 			EnableDisableUI();
@@ -169,13 +163,6 @@ namespace PicTap
 				((this.ipdfView.EnableBorderDetection) ? "AUTOCROP On" : "AUTOCROP Off");
 		}*/
 
-		/*void changeFlashButton(NSString title)
-		{
-			FlashButton.SetImage(UIImage.FromFile(
-					(title.Contains(flashOn)) ? "flash.png" : "flashoff.png"),
-					UIControlState.Normal);
-		}*/
-
 		void changeFlashButton(bool enable)
 		{
 			FlashButton.SetImage(UIImage.FromFile(
@@ -196,7 +183,7 @@ namespace PicTap
 				() =>
 				{
 					//dismissTapParam.View.Frame = CGRect.Inflate(this.View.Bounds, 0, this.View.Bounds.Size.Height);
-					dismissTapParam.View.Frame = new CGRect(WeakSelf.View.Bounds.X, WeakSelf.View.Bounds.Height*2,
+					dismissTapParam.View.Frame = new CGRect(WeakSelf.View.Bounds.X, -WeakSelf.View.Bounds.Height,
 													WeakSelf.View.Bounds.Width, WeakSelf.View.Bounds.Height);
 				},
 			     (bool finished)=> {
@@ -205,14 +192,14 @@ namespace PicTap
 			);
 		}
 
-		public async Task SaveImage()
+		/*public async Task SaveImage()
 		{
 			var filename = System.DateTime.Now.Second + "cropped.png";
 			Console.WriteLine("Saving Image, {0}", filename);
 			DeviceUtil.SaveImageToPhotosApp(captureImageView.Image,
 				filename);
 			Console.WriteLine("Done with IPDFCamera.SaveImage()");
-		}
+		}*/
 
 		/*void focusIndicatorAnimateToPoint(CGPoint targetPoint)
 		{
@@ -277,7 +264,10 @@ namespace PicTap
 				dismissTap = new UITapGestureRecognizer(dismissPreview);
 				captureImageView.AddGestureRecognizer(dismissTap);
 					
-				UIView.AnimateNotify(0.8, 0.0, (nfloat)1.0, (nfloat)0.5,
+				UIView.AnimateNotify(UIAccessibility.IsReduceMotionEnabled ? 0.0 : 0.8, 
+				     0.0, 
+				    (nfloat)1.0, 
+				    (nfloat)0.5,
 				    UIViewAnimationOptions.AllowUserInteraction, 
 					() =>
 					{
@@ -288,8 +278,6 @@ namespace PicTap
 						if (finished)
 						{
 							loadContactsFromPic(captureImageView.Image, true);
-							//await Task.Delay(3000);
-							//dismissPreview(dismissTap);
 						}
 						else UserDialogs.Instance.Alert("Please try again", "Something went wrong", "OK");
 					}

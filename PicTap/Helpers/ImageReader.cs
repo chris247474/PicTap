@@ -541,7 +541,7 @@ namespace PicTap
 
 				for (int c = 0; c < inputImages.Length; c++)
 				{
-					var image = GetStreamFromUIImage(inputImages[c]);
+					var image = StreamByteDataUIImageConverter.GetStreamFromUIImage(inputImages[c]);
 					successScores.Add(await ExtractTextTest(image, engineMode, 
 					     segMode, correctStringOutputs[c], c));
 				}
@@ -884,7 +884,7 @@ namespace PicTap
 			//save for testing purposes
 			//SaveImageToPhotosApp(preProcessedStream, System.DateTime.Now.Second + "bwsharp.png");
 
-			var result = await ExtractResultFromImage_Tesseract(GetStreamFromUIImage(image));
+			var result = await ExtractResultFromImage_Tesseract(StreamByteDataUIImageConverter.GetStreamFromUIImage(image));
 			var totalLines = (float)result.Count();
 			var textline = string.Empty;
 			var wholeTextForClipboard = string.Empty;
@@ -1030,7 +1030,9 @@ namespace PicTap
 				int progressCtr = 0;
 				string wholeTextForClipboard = "";
 
-				image = GetStreamFromUIImage(OCRPreProcessor.ScaleImage(GetUIImageFromStream(image)));
+				image = StreamByteDataUIImageConverter.GetStreamFromUIImage(
+					OCRPreProcessor.ScaleImage(
+						StreamByteDataUIImageConverter.GetUIImageFromStream(image)));
 
 				result = await ExtractOCRResultFromImage_MicrosoftVision(image);
 
@@ -1831,70 +1833,6 @@ namespace PicTap
 			Console.WriteLine("SaveImageToDiskThenNotifyViewModelToStartPreprocessingImage done");
 			return string.Empty;
 		}*/
-
-
-
-		public Stream GetStreamFromFilename(string file)
-		{
-			//Console.WriteLine ("In GetStreamFromFilename");
-			return GetStreamFromUIImage(UIImage.FromFile(file));
-		}
-		public Stream GetStreamFromUIImage(UIImage image)
-		{
-			//Console.WriteLine ("In GetStreamFromUIImage");
-			return BytesToStream(UIImageToBytes(image));
-		}
-		public UIImage GetUIImageFromStream(Stream s)
-		{
-			//Console.WriteLine ("in GetUIImageFromStream");
-			return GetImagefromByteArray(StreamToBytes(s));
-		}
-
-		public UIImage GetImagefromByteArray(byte[] imageBuffer)
-		{
-			//Console.WriteLine ("in GetImagefromByteArray");
-			NSData imageData = NSData.FromArray(imageBuffer);
-			//Console.WriteLine ("NSData loaded from bytes");
-			var img = UIImage.LoadFromData(imageData);
-			//Console.WriteLine ("UIImage null: {0}", (img == null) ? true : false);
-			return img;
-		}
-
-		public byte[] StreamToBytes(Stream input)
-		{
-			//Console.WriteLine ("In StreamToBytes");
-			using (MemoryStream ms = new MemoryStream())
-			{
-				input.CopyTo(ms);
-				//Console.WriteLine ("bytes copied");
-				ms.Seek(0, SeekOrigin.Begin);
-				//Console.WriteLine ("seekorigin done");
-				input.Seek(0, SeekOrigin.Begin);
-				//Console.WriteLine ("input seek done");
-				return ms.ToArray();
-			}
-		}
-
-		public Stream BytesToStream(byte[] image)
-		{
-			//Console.WriteLine ("In BytesToStream");
-			MemoryStream stream = new MemoryStream();
-			stream.Write(image, 0, image.Length);
-			stream.Seek(0, SeekOrigin.Begin);
-			return stream;
-		}
-
-		public byte[] UIImageToBytes(UIImage image)
-		{
-			Byte[] myByteArray = null;
-			using (NSData imageData = image.AsPNG())
-			{
-				myByteArray = new Byte[imageData.Length];
-				System.Runtime.InteropServices.Marshal.Copy(imageData.Bytes, myByteArray, 0,
-					Convert.ToInt32(imageData.Length));
-			}
-			return myByteArray;
-		}
 	}
 }
 

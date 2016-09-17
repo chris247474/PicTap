@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<component format="1" id="GPUImage">
+  <name>GPUImage</name>
+  <publisher>Xamarin Inc</publisher>
+  <publisher-url>https://xamarin.com</publisher-url>
+  <version>0.1.7.0</version>
+  <summary>An open source iOS framework for GPU-based image and video processing.</summary>
+  <samples>
+    <sample id="GPUImageSample">
+      <name>GPUImage Sample</name>
+      <summary>GPUImage Sample</summary>
+    </sample>
+  </samples>
+</component>

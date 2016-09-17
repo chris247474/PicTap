@@ -252,6 +252,8 @@
     <Compile Include="Helpers\EmailService.cs" />
     <Compile Include="Helpers\PingService.cs" />
     <Compile Include="Helpers\OCRPreProcessor.cs" />
+    <Compile Include="Helpers\StreamByteDataUIImageConverter.cs" />
+    <Compile Include="Helpers\InterstitialOnDismissViewController.cs" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\capture_button%402x.png" />

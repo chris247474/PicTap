@@ -13,7 +13,8 @@ namespace PicTap
 		static string saveto = "Save to Contacts";
 		static string copyto = "Copy For Pasting";
 
-		public static async void OpenIn(CNMutableContact contact, string textClipboard = "") 
+		public static async void OpenIn(CNMutableContact contact, string textClipboard = "",
+		                                UIViewController VCForUIThread = null) 
 		{
 			var result = await UserDialogs.Instance.ActionSheetAsync(
 				string.Format("What do we do with contact {0} {1}", contact.GivenName, contact.FamilyName), null, 
@@ -25,7 +26,13 @@ namespace PicTap
 
 			if (string.Equals(result, openin))
 			{
-				DeviceUtil.Share(CombineContactDataForExporting(contact));
+				DeviceUtil.Share(CombineContactDataForExporting(contact), 
+				                 GlobalVariables.VCToInvokeOnMainThread); 
+				/*if (!Settings.IsPremiumSettings)
+				{
+					Console.WriteLine("Not premium, showing interstitial");
+					AdFactory.ShowInterstitial();
+				}*/
 			}
 			else if (string.Equals(result, saveto))
 			{
@@ -33,7 +40,12 @@ namespace PicTap
 			}else if (string.Equals(result, copyto))
 			{
 				DeviceUtil.CopyToClipboard(textClipboard);
-				UserDialogs.Instance.Alert("Copied!", null, "OK");
+				await UserDialogs.Instance.AlertAsync("Copied!", null, "OK");
+				if (!Settings.IsPremiumSettings)
+				{
+					Console.WriteLine("Not premium, showing interstitial");
+					AdFactory.ShowInterstitial();
+				}
 			}
 		}
 
